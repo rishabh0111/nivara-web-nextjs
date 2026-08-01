@@ -1,0 +1,670 @@
+@import "tailwindcss";
+
+/*
+ * The palette, and why it is anchored where it is.
+ *
+ * The four chart series colours below came first, and they were validated as a
+ * set — the lightness band, the chroma floor, and the separation between each
+ * adjacent pair under colour-vision deficiency. Rather than choose a brand
+ * palette beside them and end up with two unrelated blues on one screen, the
+ * brand is anchored *on* them: the identity blue is the series-1 family and the
+ * urgency orange is the series-2 family. A KPI tile and the line it summarises
+ * are then the same colour because they are the same thing, not by coincidence.
+ *
+ * Orange is spent only on elapsed time — a queue going stale, an answer nobody
+ * has given, a window that closed. It is never decoration. On a desk where the
+ * only real question is how long somebody has been waiting, an accent that
+ * appears on a heading teaches a reader to stop seeing it on the one row that
+ * matters.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Ground. Slightly warm paper against cool ink, so the surfaces read as
+     stacked rather than as one flat sheet with lines drawn on it. */
+  --canvas: #f6f7f9;
+  --surface: #ffffff;
+  --surface-sunken: #f1f3f6;
+  --border: #e3e7ed;
+  --border-strong: #cbd3de;
+
+  /*
+   * Ink, in three weights, and all three clear 4.5:1 on every ground below.
+   *
+   * `faint` began lighter, as furniture that was never meant to carry a
+   * sentence — and then it was carrying a chart's axis labels, the end of a
+   * list and the line under each card on the front page. Rather than police
+   * that at every call site, it was darkened until the quietest text in the
+   * application is still readable text. The step between the three is smaller
+   * than it was; being able to read all of them is worth more than the contrast
+   * between them.
+   */
+  --ink: #131a26;
+  --ink-muted: #5a6675;
+  --ink-faint: #66707d;
+
+  /* Identity and action. */
+  --accent: #1d63c4;
+  --accent-hover: #17509f;
+  --accent-ink: #ffffff;
+  --accent-wash: #eaf1fb;
+
+  /* Elapsed time, and nothing else. */
+  --urgent: #b4501c;
+  --urgent-wash: #fdf0e8;
+
+  /* Refusal. Distinct from urgent: one is a clock, the other is a failure. */
+  --danger: #b3261e;
+  --danger-wash: #fdecea;
+
+  /* Settled. */
+  --calm: #10714f;
+  --calm-wash: #e6f4ee;
+
+  /*
+   * Internal, and not for the Contact's eyes.
+   *
+   * Its own hue rather than the urgent orange it used to borrow. A Note is an
+   * aside between colleagues — it is not late, and nothing has gone wrong — and
+   * dressing one as a warning taught readers to skim past the colour that is
+   * supposed to mean a ticket has gone unanswered.
+   */
+  --note: #5b4bb0;
+  --note-wash: #f1effa;
+
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+
+  /* Depth. Two steps only — a raised card and a thing that floats over the
+     page. A third step invites every element to claim it is the important one. */
+  --lift: 0 1px 2px rgb(19 26 38 / 0.04), 0 1px 3px rgb(19 26 38 / 0.06);
+  --lift-high: 0 4px 12px rgb(19 26 38 / 0.08), 0 12px 32px rgb(19 26 38 / 0.1);
+
+  --radius: 0.625rem;
+}
+
+/*
+ * The dark palette, named once.
+ *
+ * It is applied by two rules — the media query for a reader who has expressed
+ * no preference, and the attribute for one who has picked from the control.
+ * Only the *assignments* are written twice; the values live here alone, because
+ * a second copy of a hex code is where two themes quietly stop matching.
+ */
+:root {
+  --d-canvas: #0c1017;
+  --d-surface: #141a23;
+  --d-surface-sunken: #10151d;
+  --d-border: #232c39;
+  --d-border-strong: #35404f;
+
+  --d-ink: #e7ebf1;
+  --d-ink-muted: #9aa6b6;
+  --d-ink-faint: #6e7b8c;
+
+  /* Lifted, not inverted. The light-mode accent is legible on white and
+     muddy on near-black; these are the same hues re-chosen for this ground. */
+  --d-accent: #6ba3f0;
+  --d-accent-hover: #8bb8f5;
+  --d-accent-ink: #0c1017;
+  --d-accent-wash: #17263c;
+
+  --d-urgent: #f0915f;
+  --d-urgent-wash: #2e1d13;
+
+  --d-danger: #f08a82;
+  --d-danger-wash: #2e1614;
+
+  --d-calm: #5ec79c;
+  --d-calm-wash: #10291f;
+
+  --d-note: #a99af0;
+  --d-note-wash: #1d1a30;
+
+  --d-series-1: #3987e5;
+  --d-series-2: #d95926;
+  --d-series-3: #199e70;
+  --d-series-4: #c98500;
+
+  /* Shadow does almost nothing on a dark ground; the border carries the
+     separation instead, which is why it steps up rather than the shadow. */
+  --d-lift: 0 1px 2px rgb(0 0 0 / 0.35);
+  --d-lift-high: 0 8px 28px rgb(0 0 0 / 0.55);
+}
+
+/* No stated preference: follow the system, unless light was chosen explicitly. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --canvas: var(--d-canvas);
+    --surface: var(--d-surface);
+    --surface-sunken: var(--d-surface-sunken);
+    --border: var(--d-border);
+    --border-strong: var(--d-border-strong);
+
+    --ink: var(--d-ink);
+    --ink-muted: var(--d-ink-muted);
+    --ink-faint: var(--d-ink-faint);
+
+    --accent: var(--d-accent);
+    --accent-hover: var(--d-accent-hover);
+    --accent-ink: var(--d-accent-ink);
+    --accent-wash: var(--d-accent-wash);
+
+    --urgent: var(--d-urgent);
+    --urgent-wash: var(--d-urgent-wash);
+
+    --danger: var(--d-danger);
+    --danger-wash: var(--d-danger-wash);
+
+    --calm: var(--d-calm);
+    --calm-wash: var(--d-calm-wash);
+
+    --note: var(--d-note);
+    --note-wash: var(--d-note-wash);
+
+    --series-1: var(--d-series-1);
+    --series-2: var(--d-series-2);
+    --series-3: var(--d-series-3);
+    --series-4: var(--d-series-4);
+
+    --lift: var(--d-lift);
+    --lift-high: var(--d-lift-high);
+  }
+}
+
+/* Chosen from the control, and it wins in both directions. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --canvas: var(--d-canvas);
+  --surface: var(--d-surface);
+  --surface-sunken: var(--d-surface-sunken);
+  --border: var(--d-border);
+  --border-strong: var(--d-border-strong);
+
+  --ink: var(--d-ink);
+  --ink-muted: var(--d-ink-muted);
+  --ink-faint: var(--d-ink-faint);
+
+  --accent: var(--d-accent);
+  --accent-hover: var(--d-accent-hover);
+  --accent-ink: var(--d-accent-ink);
+  --accent-wash: var(--d-accent-wash);
+
+  --urgent: var(--d-urgent);
+  --urgent-wash: var(--d-urgent-wash);
+
+  --danger: var(--d-danger);
+  --danger-wash: var(--d-danger-wash);
+
+  --calm: var(--d-calm);
+  --calm-wash: var(--d-calm-wash);
+
+  --note: var(--d-note);
+  --note-wash: var(--d-note-wash);
+
+  --series-1: var(--d-series-1);
+  --series-2: var(--d-series-2);
+  --series-3: var(--d-series-3);
+  --series-4: var(--d-series-4);
+
+  --lift: var(--d-lift);
+  --lift-high: var(--d-lift-high);
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-sunken: var(--surface-sunken);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-wash: var(--accent-wash);
+
+  --color-urgent: var(--urgent);
+  --color-urgent-wash: var(--urgent-wash);
+  --color-danger: var(--danger);
+  --color-danger-wash: var(--danger-wash);
+  --color-calm: var(--calm);
+  --color-calm-wash: var(--calm-wash);
+  --color-note: var(--note);
+  --color-note-wash: var(--note-wash);
+
+  --font-sans:
+    var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --shadow-lift: var(--lift);
+  --shadow-lift-high: var(--lift-high);
+
+  --radius-card: var(--radius);
+}
+
+/*
+ * The motion vocabulary, named once.
+ *
+ * Four movements and no more, because a desk is somewhere people work all day
+ * and the fastest way to make software tiring is to animate everything a
+ * little differently. Each one has a job:
+ *
+ * `rise`  — something arrived that the reader did not ask for, and it should
+ *           announce itself by moving into place rather than blinking into it.
+ * `pop`   — something the reader *did* ask for, opening from the control they
+ *           pressed. Shorter, and slightly overshooting, so it feels attached
+ *           to the press.
+ * `chime` — the bell, and only the bell. A count that changes silently in the
+ *           corner of a busy screen is a count nobody notices.
+ * `sheen` — a skeleton, saying "still coming" without a spinner.
+ *
+ * Every one of them is switched off wholesale by the reduced-motion rule at the
+ * foot of this file. That is the only reason it is safe to use them freely.
+ */
+@theme {
+  --animate-rise: rise 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-pop: pop 160ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-chime: chime 700ms ease-in-out;
+  --animate-sheen: sheen 1.6s ease-in-out infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+}
+
+/* A nudge, not a jingle. Two small swings and done. */
+@keyframes chime {
+  10%,
+  30% {
+    transform: rotate(-10deg);
+  }
+  20%,
+  40% {
+    transform: rotate(10deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes sheen {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-feature-settings:
+      "cv05" 1,
+      "ss03" 1;
+  }
+
+  /*
+   * One focus ring for the whole application, stated once.
+   *
+   * `:focus-visible` rather than `:focus` so a mouse press does not leave a
+   * ring behind, and an offset outline rather than a box-shadow so it stays
+   * visible over any surface colour including the accent fill it may land on.
+   */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    /* Deliberately no border-radius here. An outline already follows the
+       element's own corners, and setting a radius on focus would square off
+       every rounded button in the application at the moment it is focused. */
+  }
+
+  /*
+   * Tailwind v4's preflight stopped giving buttons a pointer cursor, on the
+   * reasoning that a native button does not have one. Most of the controls in
+   * this application are buttons that look like rows and cards — a queue entry,
+   * a Ticket in a list — and those read as unclickable without it.
+   */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary {
+    cursor: pointer;
+  }
+
+  /* Numbers in a queue, a table, or a KPI belong in columns. Tabular figures
+     stop a count from reflowing sideways every time it ticks. */
+  th,
+  td,
+  time,
+  output {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background-color: var(--accent-wash);
+    color: var(--ink);
+  }
+}
+
+/*
+ * The controls that appear on every Surface, stated once.
+ *
+ * These are the shapes that were being retyped as utility strings in a dozen
+ * files — a button, a box somebody types into, a card, a status chip. Written
+ * as classes because the alternative is twelve slightly different paddings,
+ * and because the one thing a portfolio reader notices first is whether two
+ * buttons on different screens are the same button.
+ *
+ * They compose with utilities rather than replacing them: `class="btn
+ * btn-primary w-full"` is the intended shape.
+ */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    /* 44px on touch, which is the floor a thumb needs. */
+    min-height: 2.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  @media (pointer: coarse) {
+    .btn {
+      min-height: 2.75rem;
+    }
+  }
+
+  /*
+   * `aria-disabled` as well as `disabled`, because several controls here refuse
+   * without going disabled on purpose — a disabled button cannot hold focus,
+   * and dropping a reader to the top of the document at the moment they press
+   * something is worse than the press doing nothing.
+   */
+  .btn:not(:disabled):not([aria-disabled="true"]):active {
+    /* Barely there — 1.5% — but it is the difference between a control that
+       responds and one that merely changes colour a moment later. */
+    transform: scale(0.985);
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .btn-primary:not(:disabled):not([aria-disabled="true"]):hover {
+    background-color: var(--accent-hover);
+  }
+
+  .btn-quiet {
+    background-color: var(--surface);
+    border-color: var(--border-strong);
+    color: var(--ink);
+  }
+
+  .btn-quiet:not(:disabled):not([aria-disabled="true"]):hover {
+    background-color: var(--surface-sunken);
+    border-color: var(--ink-faint);
+  }
+
+  /* For the one destructive act on a screen, and never for more than one. */
+  .btn-danger {
+    background-color: var(--surface);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .btn-danger:not(:disabled):not([aria-disabled="true"]):hover {
+    background-color: var(--danger-wash);
+  }
+
+  /*
+   * A link that reads as one.
+   *
+   * Underlined rather than coloured alone: colour is not available to every
+   * reader, and a blue word in a paragraph of blue-grey ink is not a signal.
+   * The underline is offset far enough to clear descenders.
+   */
+  .link {
+    color: var(--accent);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    border-radius: 2px;
+    transition: color 180ms ease;
+  }
+
+  .link:hover {
+    color: var(--accent-hover);
+    text-decoration-thickness: 2px;
+  }
+
+  .input {
+    display: block;
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-strong);
+    background-color: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .input::placeholder {
+    color: var(--ink-faint);
+  }
+
+  .input:hover:not(:disabled) {
+    border-color: var(--ink-faint);
+  }
+
+  .input:focus-visible {
+    border-color: var(--accent);
+    /* Outline *and* border, so the field reads as focused at a glance and not
+       only to whoever is looking for a ring. */
+    outline-offset: 1px;
+  }
+
+  .input:disabled {
+    background-color: var(--surface-sunken);
+    color: var(--ink-muted);
+    cursor: not-allowed;
+  }
+
+  /*
+   * A native select, still native.
+   *
+   * The arrow is drawn here rather than by a JavaScript listbox, because a
+   * native select on a phone opens the platform's own wheel — which is better
+   * than anything reimplemented, and is the control a reader already knows.
+   * All this does is stop it looking like 1998 beside the other fields.
+   */
+  select.input {
+    appearance: none;
+    padding-right: 2.25rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a6675' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.625rem center;
+    background-size: 1.125rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    select.input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa6b6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    }
+  }
+
+  /*
+   * A filter, as something you can hit.
+   *
+   * The checkbox inside is a real, visible checkbox — not a hidden input with a
+   * styled box drawn next to it. That trick looks the same and costs the thing
+   * that matters: the native control is what a screen reader announces, what a
+   * keyboard toggles with space, and what a test can click. What changes here
+   * is the target around it, which grows from a line of text to a pill the
+   * whole of which is clickable.
+   *
+   * `:has(:checked)` lights the pill from the input's own state, so there is
+   * one source of truth for whether this filter is on and it is the checkbox.
+   */
+  .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border-strong);
+    background-color: var(--surface);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .filter-pill:hover {
+    border-color: var(--ink-faint);
+    background-color: var(--surface-sunken);
+  }
+
+  .filter-pill:has(:checked) {
+    border-color: var(--accent);
+    background-color: var(--accent-wash);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* The ring belongs on the pill, not on the 13px box inside it. */
+  .filter-pill:has(:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .filter-pill input {
+    accent-color: var(--accent);
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .card {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background-color: var(--surface);
+    box-shadow: var(--lift);
+  }
+
+  /*
+   * A small piece of state next to the thing it describes.
+   *
+   * Never colour alone — every chip carries its word, so a reader who cannot
+   * separate the orange one from the green one still reads "Waiting" and
+   * "Resolved".
+   */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.125rem;
+    white-space: nowrap;
+  }
+
+  .chip-neutral {
+    background-color: var(--surface-sunken);
+    border-color: var(--border);
+    color: var(--ink-muted);
+  }
+
+  .chip-accent {
+    background-color: var(--accent-wash);
+    border-color: color-mix(in oklab, var(--accent) 25%, transparent);
+    color: var(--accent);
+  }
+
+  .chip-urgent {
+    background-color: var(--urgent-wash);
+    border-color: color-mix(in oklab, var(--urgent) 25%, transparent);
+    color: var(--urgent);
+  }
+
+  .chip-calm {
+    background-color: var(--calm-wash);
+    border-color: color-mix(in oklab, var(--calm) 25%, transparent);
+    color: var(--calm);
+  }
+
+  .chip-danger {
+    background-color: var(--danger-wash);
+    border-color: color-mix(in oklab, var(--danger) 25%, transparent);
+    color: var(--danger);
+  }
+}
+
+@layer utilities {
+  /*
+   * Everything animated in this application goes through these, so that
+   * honouring a reduced-motion preference is one rule rather than a promise
+   * made separately at each call site.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
