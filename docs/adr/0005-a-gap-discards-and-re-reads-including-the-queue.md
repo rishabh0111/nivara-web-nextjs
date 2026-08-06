@@ -1,0 +1,11 @@
+# A Gap discards and re-reads, including the queue the reader is standing on
+
+ADR-0002 says the list is never refetched under the reader: a queue that rearranges itself while somebody is reading it is wasteful and a way to click the wrong Ticket, so what arrives on the wire marks the pages in hand as overtaken and the reader moves the list when they choose. That rule holds everywhere except one place, and the exception is worth writing down because it looks from the outside like the rule failing.
+
+**A Gap re-reads, without being asked.** The server saying its replay buffer no longer reaches back to a Room's resume point is not the same kind of statement as an event. An event is a known quantity — something happened, the pages in hand are one read away from being current, and a reader can sensibly be offered the choice of when that read happens. A Gap says the opposite: a stretch of this Room cannot be accounted for at all, and nothing here can say whether what is on screen is missing Tickets, showing ones that have left the slice, or in the wrong order. Offering a choice about that would be offering a choice nobody has the information to make.
+
+So the decision is not "sometimes we refetch". It is that being overtaken and having a Gap are different conditions, and the affordance ADR-0002 protects is only meaningful for the first of them. A reader who is told what has changed can decide; a reader looking at a list nobody can describe cannot.
+
+**What is discarded is what that Room fed, and no more.** Rooms have independent buffers, so a Gap in a Ticket's `:internal` Room says nothing about that Ticket's thread, and throwing away a conversation somebody is reading in the middle of is not free. The Notes go; the thread stays.
+
+**The data is dropped rather than left standing while the read is in flight.** Invalidating would go on showing exactly what the server has just said it cannot account for — a thread missing a reply, a log missing a transition — which is the state this whole path exists to avoid. Dropping it puts the ordinary waiting treatment on the screen for the moment the read takes, which is the honest thing for a view to say about data it does not have. It is not an error branch and nothing is announced: a bounded replay buffer working as designed is not something a User should be asked to care about.
