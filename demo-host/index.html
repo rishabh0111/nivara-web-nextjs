@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Northwind Supply — Support</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      body {
+        margin: 0;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 4rem 1.5rem;
+      }
+      h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem;
+      }
+      .lede {
+        opacity: 0.75;
+        margin-top: 0;
+      }
+      .note {
+        margin-top: 3rem;
+        padding: 1rem 1.25rem;
+        border-left: 3px solid currentColor;
+        opacity: 0.7;
+        font-size: 0.9rem;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+    </style>
+
+    <!--
+      Deliberately hostile, and left switched on.
+
+      A tenant's own stylesheet is the thing most likely to break the Widget's
+      appearance, and every rule below is one a real site plausibly has: a
+      global reset with `!important`, a font and colour inherited from `body`,
+      a `box-sizing` opinion, and a `z-index` ceiling. They are here so that a
+      reviewer opening this page sees the Widget survive them rather than being
+      told it would.
+
+      Delete these and the demo stops demonstrating anything.
+    -->
+    <style>
+      body {
+        font-family: "Comic Sans MS", "Papyrus", cursive !important;
+        color: #b91c1c !important;
+        line-height: 2.4 !important;
+        letter-spacing: 0.08em !important;
+      }
+      * {
+        box-sizing: content-box !important;
+      }
+      /* Aimed squarely at the elements the Widget is built from. Inside the
+         shadow root none of these selectors match anything at all. */
+      button,
+      section,
+      h2 {
+        border: 4px dashed #b91c1c !important;
+        border-radius: 0 !important;
+        background: repeating-linear-gradient(
+          45deg,
+          #fde68a,
+          #fde68a 8px,
+          #fca5a5 8px,
+          #fca5a5 16px
+        ) !important;
+        padding: 2rem !important;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Northwind Supply</h1>
+      <p class="lede">A pretend customer of Nivara Desk, on a site Nivara Desk does not own.</p>
+
+      <p>
+        This page exists to be somewhere else. The Widget runs cross-origin by construction, and
+        the origin it is judged on has to be real before the Widget is built — a demo served from
+        the application's own origin would pass a gate it was never tested against.
+      </p>
+
+      <p>
+        The launcher in the corner is the Widget, running in this page's own document inside a
+        shadow root. Everything on this page is styled by the deliberately hostile rules in the
+        source above; the Widget is not, and nothing of the Widget's reaches these paragraphs.
+      </p>
+
+      <p class="note">
+        This origin is allowlisted on the isolation tenant. An origin nobody listed is refused by
+        <code>POST /widget/sessions</code>, which is the whole of what the allowlist is for. Copy
+        the snippet below onto any other origin and the launcher will say support is not available
+        on that site.
+      </p>
+    </main>
+
+    <!--
+      The Snippet. One script tag, two values, and nothing else to do.
+
+      `src` points at the application's own origin, because that is where the
+      bundle is served from. It is *not* what the allowlist judges: the origin
+      on the request is this page's, which is the whole reason the Widget
+      renders here rather than inside a frame served from over there.
+
+      `data-tenant-id` is Sortwood, the isolation Tenant, because this origin is
+      allowlisted on that Tenant and on no other. It is public by design and
+      grants nothing on its own — the request is judged on the origin, which no
+      script can forge.
+
+      `src` is the one value still to be set, by whoever owns the deployment.
+      Its host is a reserved `.example` domain rather than a plausible guess:
+      until issue 02 produces the production origin there is no correct value,
+      and a host that resolves would have this page fetch a script from whoever
+      happens to own it. To see the Widget before then, run
+      `npm run widget:build` and `npm run dev`, serve this directory on port
+      4173 — the port allowlisted for it — and point `src` at
+      `http://localhost:3000/widget/widget.js`. See `docs/deployment.md`.
+    -->
+    <script
+      src="https://nivara-web.example/widget/widget.js"
+      data-tenant-id="5eed0000-0000-4000-8000-000000000002"
+      defer
+    ></script>
+  </body>
+</html>
