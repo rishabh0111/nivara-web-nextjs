@@ -1,0 +1,11 @@
+# Analytics is offered on the role the principal carries, and refused by the API
+
+`GET /analytics` is gated on the `analytics:read` scope. A client that wants to know whether to offer the screen therefore wants to know whether the credential holds that scope — and cannot ask. `PrincipalDto` publishes `kind`, `userId`, `tenantId`, `role`, `email` and `name`, and no scopes; the document lists scopes on service tokens only. The role is the whole of what the API tells a client about what its credential reaches.
+
+**So the offer is made on the role, and `admin` is the role that holds the scope.** It is read through `canReadAnalytics(principal)` rather than an `isAdmin` at the call site, because the permission is the thing being asked about and the role is only today's evidence for it: the day a scope list appears on the principal, one function reads it and nothing else changes.
+
+The alternative was to ask the server — request the report once and offer the screen if it is not refused. That spends a request on every paint of the queue to render a link, and spends it on the slowest endpoint this API has, to answer a question about a link. It also inverts what a refusal is for: a 403 would become a routine control-flow answer that the interface asks for on purpose, which makes a real one indistinguishable from an expected one in every log and every error surface.
+
+**Duplicating the rule is the cost, and it is bounded by being a rule about the interface rather than about the data.** The API refuses an agent regardless, and nothing here decides who may read anything — a wrong answer on this side is a link that should not be there, or one that should, and neither is a leak. What is not acceptable is the third possibility: an interface that advertises a screen and then fails on it. So the screen is gated the same way the link is, and an agent who arrives by typing the address is told plainly instead of watching five requests fail.
+
+**Nothing is asked while the principal is still in flight.** "Not yet answered" and "not permitted" are the same absence, and treating them as the same thing would tell an admin they may not read a screen and then take it back a moment later. The queue does not wait on the principal — work is not withheld because a name has not arrived — but a screen that exists only for one permission does.
