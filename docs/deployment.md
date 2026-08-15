@@ -123,8 +123,15 @@ predicate lives.
 
 What this does **not** establish is the two boxes above it: that the Snippet renders a Launcher on
 the deployed demo host, and that hostile host-page CSS leaves it unchanged. Those need the page
-deployed and opened. GitHub Pages is not enabled on this repository yet — `demo-host.yml` has never
-had a Pages environment to publish into, and the URL 404s.
+deployed and opened. It is deployed — GitHub Pages serves it at
+<https://rishabh0111.github.io/nivara-web-nextjs/> — so what is left is the opening, which is a
+person looking rather than a command reporting.
+
+The same distinction applies to the gate one more time. `curl` establishes that the API answers
+correctly; it does not establish that the Widget *asks* correctly, because `curl` sends an `Origin`
+header and a browser sets one. Serving the page on an unlisted origin — any port other than the
+allowlisted `4173`, `npx serve demo-host -l 5500` for instance — is what asks the question from a
+browser, and the Launcher taking itself away is the answer.
 
 ## The two API-side blockers are cleared
 
