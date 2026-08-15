@@ -25,8 +25,16 @@ all three of them:
 | Real-time origin | that URL plus `/rt`, never a second variable that could disagree with the first |
 | Type generation | that URL plus `/openapi.json` |
 
-The default is in [`.env`](.env) and is the deployed API. Override it in `.env.local`. Point it at
-another Nivara Desk API and nothing else in this repository changes.
+There is no committed default. Copy [`.env.example`](.env.example) to `.env.local`, which holds the
+deployed API's URL:
+
+```bash
+cp .env.example .env.local
+```
+
+Unset, nothing starts and nothing builds — [`src/config/api.ts`](src/config/api.ts) names the
+missing variable rather than falling back to a value nobody chose, and a committed `.env` would be
+that value. Point it at another Nivara Desk API and nothing else in this repository changes.
 
 ## Generated types
 

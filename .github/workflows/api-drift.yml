@@ -7,6 +7,11 @@ on:
     - cron: "0 7 * * *"
   workflow_dispatch:
 
+# Which API is being watched for drift is a deployment fact, so it is named in
+# the workflow rather than inherited from a file in the tree.
+env:
+  NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+
 jobs:
   drift:
     runs-on: ubuntu-latest

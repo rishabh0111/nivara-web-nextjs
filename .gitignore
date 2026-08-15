@@ -10,6 +10,10 @@ build/
 next-env.d.ts
 *.tsbuildinfo
 
+# `.env.example` is the committed one, and it is a template rather than a value
+# in force. A committed `.env` applies to every environment at once, which is
+# the default `src/config/api.ts` deliberately refuses to have.
+.env
 .env.local
 .env.*.local
 

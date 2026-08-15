@@ -10,8 +10,12 @@ Two origins, deployed separately, and they are meant to be unrelated.
 ## The application
 
 Vercel project, Next.js framework preset, no build overrides. One environment variable —
-`NEXT_PUBLIC_API_URL` — set on **Production only**, to the deployed API. See the README for why
-there is only one.
+`NEXT_PUBLIC_API_URL` — set on **Production and Preview**, to the deployed API. See the README for
+why there is only one.
+
+It is set on both because there is no committed `.env` to inherit it from, and the build reads it:
+an environment without it fails to build rather than building something misconfigured. A Preview
+that cannot build cannot render the shell either, which is the one thing Previews are for.
 
 The production origin has to be registered on the API side before a credentialed call from it will
 be accepted. That registration is a change in `nivara-api-nestjs`, made once this URL exists, and
@@ -24,8 +28,13 @@ would mean either registering each one by hand or wildcarding the hosting platfo
 wildcard over `*.vercel.app` grants credentialed access to every site anybody hosts there, which is
 the whole platform.
 
-So `NEXT_PUBLIC_API_URL` is not set on the Preview environment. Previews render the shell and their
-API calls fail. That is the intended behaviour, not a bug to be filed.
+So no preview origin is registered, and the API refuses them. Previews render the shell, and their
+credentialed calls fail the CORS check. That is the intended behaviour, not a bug to be filed.
+
+The refusal is the **API's**, not a missing variable here. Previews are configured exactly as
+Production is and still cannot reach the API, which is the stronger arrangement: it holds whether or
+not anyone remembers to leave a setting blank, and it is enforced on the server rather than by the
+absence of something on the client.
 
 Review a change against the API by running it locally against the deployed API — `localhost` is a
 stable origin and can be registered once.
