@@ -18,6 +18,9 @@ const page = readFileSync(resolve(import.meta.dirname, "../../demo-host/index.ht
 /** The Tenant the demo host's origin is allowlisted on, and the only one. */
 const ISOLATION_TENANT_ID = "5eed0000-0000-4000-8000-000000000002";
 
+/** Where the Widget bundle is served from. The application's own origin. */
+const PRODUCTION_ORIGIN = "https://nivara-web-nextjs.vercel.app";
+
 const snippet = () => {
   const tag = page.match(/<script\b[^>]*\bdata-tenant-id\b[^>]*>/)?.[0];
 
@@ -59,25 +62,24 @@ describe("the Snippet on the demo host page", () => {
   });
 
   /**
-   * Until a production origin exists there is no correct host, and a host that
-   * resolves is worse than one that does not. `nivara-web.vercel.app` was one:
-   * it is a live application belonging to somebody else, so the demo host would
-   * have asked a stranger's origin for a script on every visit.
+   * The deployed application's own origin, pinned exactly.
    *
-   * Two hosts are allowed, and no others. `.example` is reserved by RFC 2606 and
-   * can never be registered by anyone, which is what makes an unset value safe
-   * to commit; `localhost` is the local run the page's own comment describes,
-   * where the bundle is served by `next dev` and the demo host by port 4173. A
-   * reader following those instructions should not have to red the suite to do
-   * it.
+   * A host that resolves but is not ours is the failure worth guarding against:
+   * `nivara-web.vercel.app` is a live application belonging to somebody else,
+   * and a demo host carrying it would have asked a stranger's origin for a
+   * script on every visit. That is why this was a reserved `.example` host
+   * while there was no correct value, and why it is an equality rather than a
+   * pattern now that there is — a pattern would accept the next plausible
+   * neighbour just as readily.
    *
-   * When `02` produces the real origin this expectation is updated along with
-   * the page — deliberately, by whoever owns the deployment, which is the point.
+   * `localhost` stays allowed, because the page's own comment describes running
+   * the whole thing locally against `next dev`, and a reader following those
+   * instructions should not have to red the suite to do it.
    */
-  it("points at a host nobody else can answer on", () => {
-    const { hostname } = new URL(snippet().src);
+  it("points at the origin the Widget is deployed to", () => {
+    const { origin, hostname } = new URL(snippet().src);
 
-    expect(hostname).toMatch(/(\.example|^localhost)$/);
+    expect(origin === PRODUCTION_ORIGIN || hostname === "localhost").toBe(true);
   });
 
   /**

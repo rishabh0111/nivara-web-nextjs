@@ -85,11 +85,11 @@ Matching is **exact equality** after case and trailing-slash normalization — n
 wildcards, and the opaque `null` origin a sandboxed frame presents is refused rather than compared.
 A fourth origin means a fourth entry, seeded in `nivara-api-nestjs`.
 
-The page carries the Snippet, and one value in it is still to be set by whoever owns the deployment:
+The page carries the Snippet, and both of its values are set:
 
 | | |
 |---|---|
-| `src` | The application's production origin plus `/widget/widget.js`. Currently `https://nivara-web.example`, a **reserved** RFC 2606 host that can never be registered, until the Vercel project exists. It was `https://nivara-web.vercel.app`, which is not an unset value but a live application belonging to somebody else — a demo host that shipped with it would have asked a stranger's origin for a script on every visit. Pinned by [`src/widget/demo-host.test.ts`](../src/widget/demo-host.test.ts), which fails if it is ever parked somewhere answerable again. |
+| `src` | `https://nivara-web-nextjs.vercel.app/widget/widget.js` — the application's production origin. It was `https://nivara-web.example` while no correct value existed, a **reserved** RFC 2606 host that can never be registered by anyone; before that it was `https://nivara-web.vercel.app`, which is not an unset value but a live application belonging to somebody else, and a demo host shipping with it would have asked a stranger's origin for a script on every visit. Pinned by exact equality in [`src/widget/demo-host.test.ts`](../src/widget/demo-host.test.ts) rather than by a pattern, which would accept the next plausible neighbour just as readily. |
 | `data-tenant-id` | Set: the isolation Tenant above. Public by design; it grants nothing without the origin. |
 
 The page's stylesheet is **deliberately hostile** and is not to be tidied up: a global `!important`

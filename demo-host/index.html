@@ -116,17 +116,16 @@
       grants nothing on its own — the request is judged on the origin, which no
       script can forge.
 
-      `src` is the one value still to be set, by whoever owns the deployment.
-      Its host is a reserved `.example` domain rather than a plausible guess:
-      until issue 02 produces the production origin there is no correct value,
-      and a host that resolves would have this page fetch a script from whoever
-      happens to own it. To see the Widget before then, run
-      `npm run widget:build` and `npm run dev`, serve this directory on port
-      4173 — the port allowlisted for it — and point `src` at
-      `http://localhost:3000/widget/widget.js`. See `docs/deployment.md`.
+      `src` is the deployed application's own origin. It was a reserved
+      `.example` host while there was no correct value to put here — a host that
+      resolves would have had this page fetch a script from whoever happened to
+      own it. To run the whole thing locally instead, `npm run widget:build` and
+      `npm run dev`, serve this directory on port 4173 — the port allowlisted
+      for it — and point `src` at `http://localhost:3000/widget/widget.js`. See
+      `docs/deployment.md`.
     -->
     <script
-      src="https://nivara-web.example/widget/widget.js"
+      src="https://nivara-web-nextjs.vercel.app/widget/widget.js"
       data-tenant-id="5eed0000-0000-4000-8000-000000000002"
       defer
     ></script>
