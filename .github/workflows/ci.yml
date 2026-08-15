@@ -5,12 +5,12 @@ on:
     branches: [main]
   pull_request:
 
-# The one variable, named here because there is no committed `.env` to inherit
-# it from. It is a repository variable rather than a secret: it is inlined into
-# client JavaScript by definition, so masking it in logs would protect nothing
-# and only make a failed build harder to read.
-env:
-  NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+# `NEXT_PUBLIC_API_URL` is named on the steps that need it rather than on the
+# workflow, because the steps that do not need it must not see it: the mocked
+# suite registers its handlers against a fixed origin, and a real URL reaching
+# it means requests that escape the mock. It is a repository variable rather
+# than a secret — it is inlined into client JavaScript by definition, so masking
+# it in logs would protect nothing and only make a failed build harder to read.
 
 jobs:
   check:
@@ -26,6 +26,8 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
       # The budget is the only thing enforcing the Widget's module boundary
       # with the Next application, so it is checked on every commit rather than
       # noticed when somebody profiles a Tenant's page.
@@ -43,3 +45,5 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run api:drift
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
