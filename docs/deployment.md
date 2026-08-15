@@ -121,17 +121,22 @@ being **lifted** onto a site real visitors use, which is a browser-mediated atta
 browser-mediated defence. It was never a credential, and `nivara-api-nestjs` says so where the
 predicate lives.
 
-What this does **not** establish is the two boxes above it: that the Snippet renders a Launcher on
-the deployed demo host, and that hostile host-page CSS leaves it unchanged. Those need the page
-deployed and opened. It is deployed — GitHub Pages serves it at
-<https://rishabh0111.github.io/nivara-web-nextjs/> — so what is left is the opening, which is a
-person looking rather than a command reporting.
+What this does **not** establish is that the Widget *asks* correctly, only that the API answers
+correctly — `curl` sends an `Origin` header where a browser sets one, and that difference is the
+whole distinction the allowlist rests on. So the same questions were put to a browser, on the
+deployed page at <https://rishabh0111.github.io/nivara-web-nextjs/> and on an unlisted port
+(`npx serve demo-host -l 5500`, since the allowlist is exact and `4173` is the only port on it):
 
-The same distinction applies to the gate one more time. `curl` establishes that the API answers
-correctly; it does not establish that the Widget *asks* correctly, because `curl` sends an `Origin`
-header and a browser sets one. Serving the page on an unlisted origin — any port other than the
-allowlisted `4173`, `npx serve demo-host -l 5500` for instance — is what asks the question from a
-browser, and the Launcher taking itself away is the answer.
+| | |
+|---|---|
+| One script tag renders a Launcher | Yes, on a page that does nothing else to make room for it. |
+| A session mints from the allowlisted origin | `201`. |
+| An unlisted origin is refused | `403`. The Launcher removes itself and the panel reads *"Support is not available on this site."* |
+| Hostile host-page CSS | The Widget is unchanged by a global `!important` Comic Sans, an inherited colour and a `box-sizing` override, and none of the Widget's own styling reaches the host page's elements. |
+
+Both halves of that last row matter and the second is the one that gets skipped: a Widget that
+survived the host's CSS while leaking its own onto the host's headings would have failed the
+guarantee in the direction nobody was watching.
 
 ## The two API-side blockers are cleared
 
