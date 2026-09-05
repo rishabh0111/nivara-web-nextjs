@@ -21,6 +21,18 @@ The production origin has to be registered on the API side before a credentialed
 be accepted. That registration is a change in `nivara-api-nestjs`, made once this URL exists, and
 it is exact — the origin string, not a pattern.
 
+## nivara-ai
+
+A second, optional environment variable — `NEXT_PUBLIC_AI_URL` — set on **Production and Preview**,
+to the deployed `nivara-ai` service. Unlike `NEXT_PUBLIC_API_URL` it is genuinely optional: unset,
+`getAiEndpoints()` (`src/config/ai.ts`) returns `undefined` rather than failing the build, and the
+Widget's Turn (`src/api/ai-seam.ts`) is simply never triggered — a Visitor can still open a
+conversation and be answered by staff, the same as before `nivara-ai` existed. Set it wherever
+`nivara-ai` is actually reachable from a browser, which is a different origin from this
+application's and needs no allowlisting on this side: `nivara-ai`'s own CORS is wildcarded, because
+the Widget presents a bearer credential there and never a cookie (see that repository's
+`src/nivara_ai/main.py`).
+
 ## Preview deployments do not reach the API, and this is a decision
 
 Every preview gets a unique origin. Credentialed CORS requires exact origins, so accepting previews

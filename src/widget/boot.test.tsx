@@ -8,8 +8,10 @@ import { SessionStore } from "@/session/store";
 import { bootWidget, type BootedWidget } from "./boot";
 import { WIDGET_HOST_TAG } from "./shadow-host";
 import {
+  aiBaseUrl,
   baseUrl,
   conversations,
+  disclosure,
   minted,
   refused,
   snippet as makeSnippet,
@@ -32,6 +34,11 @@ beforeEach(() => {
   // host page's storage so a Visitor's conversation survives navigation, and
   // one test's session is not the next one's Visitor.
   sessionStorage.clear();
+
+  // The Start screen (an empty conversations list, which several tests here
+  // open into) fetches this the moment it renders. A benign default, same
+  // reasoning as `widget-conversation.test.tsx`'s.
+  server.use(http.get(`${aiBaseUrl}/widget/disclosure`, () => disclosure()));
 });
 
 afterEach(() => {

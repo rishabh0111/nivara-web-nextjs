@@ -28,6 +28,11 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          # Optional: nivara-ai's own base URL. Unset builds a Widget that
+          # still works, just with the AI turn never triggered
+          # (getAiEndpoints returns undefined) — the same graceful-without-it
+          # shape a deployment that has not stood nivara-ai up yet gets.
+          NEXT_PUBLIC_AI_URL: ${{ vars.NEXT_PUBLIC_AI_URL }}
       # The budget is the only thing enforcing the Widget's module boundary
       # with the Next application, so it is checked on every commit rather than
       # noticed when somebody profiles a Tenant's page.

@@ -8,10 +8,13 @@ import type { Message } from "@/tickets/message";
 import { TICKET_STATE_LABELS } from "@/tickets/ticket";
 import { timeAgo } from "@/tickets/time-ago";
 
+import { useAiTurn } from "./use-ai-turn";
 import { useWidgetThread } from "./use-widget-tickets";
 import { useWidgetWrites } from "./use-widget-writes";
 import { WidgetCompose } from "./widget-compose";
 import { widgetKeys } from "./widget-keys";
+import { WidgetTurnNotice } from "./widget-turn-notice";
+import type { WidgetSession } from "./widget-session";
 import type { WidgetTickets } from "./widget-tickets";
 
 const SENT = "Sent.";
@@ -30,11 +33,13 @@ const MOVED_UNREAD =
  */
 export function Conversation({
   api,
+  session,
   ticketId,
   /** Called with the conversation a message landed on, which need not be this one. */
   onFollow,
 }: {
   api: WidgetTickets;
+  session: WidgetSession;
   ticketId: string;
   onFollow: (ticketId: string) => void;
 }) {
@@ -44,6 +49,7 @@ export function Conversation({
   });
   const thread = useWidgetThread(api, ticketId);
   const writes = useWidgetWrites(api);
+  const aiTurn = useAiTurn(session);
 
   // Asked for newest first, so a Visitor returning to a long conversation gets
   // the last thing said rather than the first. Read downwards, which is what a
@@ -103,6 +109,11 @@ export function Conversation({
           // the same thing twice.
           if (!outcome.landedOn) return { said: true, outcome: MOVED_UNREAD };
 
+          // Whichever Conversation the message actually landed on is the one
+          // nivara-ai is asked to answer — the reply just sent is what it has
+          // to work with either way.
+          aiTurn.trigger(outcome.landedOn.id);
+
           if (outcome.landedOn.id === ticketId) return { said: true, outcome: SENT };
 
           // A closed conversation is terminal and is not revived; the reply
@@ -112,6 +123,8 @@ export function Conversation({
           return { said: true, outcome: MOVED };
         }}
       />
+
+      <WidgetTurnNotice state={aiTurn.state} />
     </div>
   );
 }

@@ -1,12 +1,19 @@
+import { useEffect, useState } from "react";
+
+import { fetchDisclosure } from "@/api/ai-seam";
 import { describeError } from "@/api/query";
 import { describeFailure } from "@/api/errors";
+import { getAiEndpoints } from "@/config/ai";
 import type { Ticket } from "@/tickets/ticket";
 import { TICKET_STATE_LABELS } from "@/tickets/ticket";
 import { timeAgo } from "@/tickets/time-ago";
 
+import { useAiTurn } from "./use-ai-turn";
 import { useWidgetConversations } from "./use-widget-tickets";
 import { useWidgetWrites } from "./use-widget-writes";
 import { WidgetCompose } from "./widget-compose";
+import { WidgetTurnNotice } from "./widget-turn-notice";
+import type { WidgetSession } from "./widget-session";
 import type { WidgetTickets } from "./widget-tickets";
 
 const OPENED_NOT_SAID =
@@ -24,10 +31,12 @@ const OPENED_NOT_SAID =
  */
 export function Conversations({
   api,
+  session,
   onRead,
   onStart,
 }: {
   api: WidgetTickets;
+  session: WidgetSession;
   onRead: (ticketId: string) => void;
   onStart: () => void;
 }) {
@@ -53,7 +62,7 @@ export function Conversations({
   // empty-state line above a "start" button would be three pieces of furniture
   // in front of the one thing they came for.
   if (conversations.items.length === 0) {
-    return <Start api={api} onStarted={onRead} />;
+    return <Start api={api} session={session} onStarted={onRead} />;
   }
 
   return (
@@ -100,16 +109,22 @@ export function Conversations({
  */
 export function Start({
   api,
+  session,
   onStarted,
 }: {
   api: WidgetTickets;
+  session: WidgetSession;
   onStarted: (ticketId: string) => void;
 }) {
   const writes = useWidgetWrites(api);
+  const aiTurn = useAiTurn(session);
+  const disclosure = useDisclosure();
 
   return (
     <div className="nvw-stack">
       <p className="nvw-greeting">Hi! What can we help with?</p>
+
+      {disclosure ? <p className="nvw-quiet nvw-body-text">{disclosure}</p> : null}
 
       <WidgetCompose
         label="Your message"
@@ -120,6 +135,7 @@ export function Start({
           const outcome = await writes.start(said);
 
           if (outcome.started) {
+            aiTurn.trigger(outcome.ticket.id);
             onStarted(outcome.ticket.id);
             return { said: true, outcome: "Sent." };
           }
@@ -136,8 +152,36 @@ export function Start({
           };
         }}
       />
+
+      <WidgetTurnNotice state={aiTurn.state} />
     </div>
   );
+}
+
+/**
+ * The pre-chat notice, fetched once. `undefined` renders nothing rather than
+ * a placeholder — a courtesy notice that flashes in a moment after the box
+ * that does not need it is a worse read than one that was simply never
+ * there, and nivara-ai being unreachable for this one unauthenticated `GET`
+ * must not stop a Visitor from starting a conversation.
+ */
+function useDisclosure(): string | undefined {
+  const [text, setText] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const ai = getAiEndpoints();
+    if (!ai) return;
+
+    let live = true;
+    void fetchDisclosure(ai.httpBaseUrl).then((fetched) => {
+      if (live) setText(fetched);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  return text;
 }
 
 /** Where a conversation stands, in the words a Visitor reads it in. */

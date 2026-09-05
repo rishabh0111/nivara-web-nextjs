@@ -25,8 +25,10 @@ import { message, note, ticket } from "@/tickets/tickets.fixtures";
 
 import { bootWidget, type BootedWidget } from "./boot";
 import {
+  aiBaseUrl,
   baseUrl,
   conversations,
+  disclosure,
   snippet as makeSnippet,
   tenantId,
   widgetSession,
@@ -74,6 +76,10 @@ beforeEach(async () => {
 
   // The socket is a real one on a real port; msw is stubbing the API, not it.
   api.use(http.all(`${wire.url}/*`, () => passthrough()));
+
+  // A session starting fresh (a lapse, a new Visitor) opens onto the Start
+  // screen, which fetches this the moment it renders.
+  api.use(http.get(`${aiBaseUrl}/widget/disclosure`, () => disclosure()));
 });
 
 afterEach(async () => {

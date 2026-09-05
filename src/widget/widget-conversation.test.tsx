@@ -8,11 +8,14 @@ import { message, ticket } from "@/tickets/tickets.fixtures";
 
 import { bootWidget, type BootedWidget } from "./boot";
 import {
+  aiBaseUrl,
   baseUrl,
   conversations,
+  disclosure,
   minted,
   snippet as makeSnippet,
   tenantId,
+  turnAnswered,
   widgetSession,
 } from "./widget.fixtures";
 
@@ -51,6 +54,18 @@ beforeEach(() => {
   // `onUnhandledRequest: "error"` does not report the one request these tests
   // deliberately do not serve.
   server.use(http.all(`${baseUrl}/socket.io/*`, () => new HttpResponse(null, { status: 503 })));
+
+  // nivara-ai is a different origin every one of these tests now reaches the
+  // moment a message sends. A benign default here, same as `mints()` is not a
+  // per-test concern either — the handful of tests actually about what
+  // nivara-ai said override it with their own `server.use`.
+  server.use(
+    // Both take an optional argument with a default (the Answer text, the
+    // disclosure text) — called through an arrow rather than passed directly,
+    // unlike `mints()`, so MSW's request-info object is never mistaken for it.
+    http.post(`${aiBaseUrl}/widget/turns/stream`, () => turnAnswered()),
+    http.get(`${aiBaseUrl}/widget/disclosure`, () => disclosure()),
+  );
 });
 
 afterEach(() => {

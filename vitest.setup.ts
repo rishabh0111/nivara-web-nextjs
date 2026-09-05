@@ -15,6 +15,11 @@ import { afterEach } from "vitest";
 // talking to the wrong server.
 process.env.NEXT_PUBLIC_API_URL = "https://api.test";
 
+// Same reasoning, same fix, for nivara-ai: forced rather than defaulted so the
+// suite's Widget tests call a mocked origin `widget.fixtures.ts` actually has
+// handlers for, never whatever the surrounding environment happens to point at.
+process.env.NEXT_PUBLIC_AI_URL = "https://ai.test";
+
 // `globals: false`, so React Testing Library's own auto-cleanup never runs.
 afterEach(cleanup);
 

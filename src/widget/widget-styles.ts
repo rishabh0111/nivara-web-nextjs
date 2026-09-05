@@ -326,6 +326,36 @@ const WIDGET = `
   overflow-wrap: anywhere;
 }
 
+/* nivara-ai's Turn is still running, or could not be reached. Never a Message
+   of its own — the real one, when there is one, arrives through the ordinary
+   thread and this is a placeholder for the gap before it does. */
+.nvw-turn-status {
+  font-style: italic;
+}
+
+/* A Turn's Answer streaming in ahead of the Message it will shortly become,
+   or the one clarifying question framed the same way. Dimmed, so it never
+   reads as a second, competing copy once the real one lands beside it. */
+.nvw-turn-streaming {
+  opacity: 0.7;
+}
+
+/* An Escalation writes only an internal Note, so this is the only notice a
+   Visitor ever gets for it — never a message bubble, since nobody said this,
+   the system is stating it. */
+.nvw-system-notice {
+  align-self: center;
+  background: transparent;
+  border: 1px dashed #c7cdd6;
+  border-radius: 0.75rem;
+  color: #5a6675;
+  font-size: 13px;
+  margin: 0;
+  max-width: 90%;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+}
+
 .nvw-compose {
   display: flex;
   flex-direction: column;

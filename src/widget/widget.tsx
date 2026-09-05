@@ -223,15 +223,21 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
           {where.at === "reading" ? (
             <Conversation
               api={api}
+              session={session}
               ticketId={where.ticketId}
               // Where a message landed is the API's answer, and this follows it.
               onFollow={(ticketId) => setWhere({ at: "reading", ticketId })}
             />
           ) : where.at === "starting" ? (
-            <Start api={api} onStarted={(ticketId) => setWhere({ at: "reading", ticketId })} />
+            <Start
+              api={api}
+              session={session}
+              onStarted={(ticketId) => setWhere({ at: "reading", ticketId })}
+            />
           ) : (
             <Conversations
               api={api}
+              session={session}
               onRead={(ticketId) => setWhere({ at: "reading", ticketId })}
               onStart={() => setWhere({ at: "starting" })}
             />

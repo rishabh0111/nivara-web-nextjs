@@ -14,7 +14,53 @@ import { createWidgetSession } from "./widget-session";
 
 export const baseUrl = "https://api.test";
 
+/** `nivara-ai`'s origin — a different backend, a different fixture base. */
+export const aiBaseUrl = "https://ai.test";
+
 export const tenantId = "ten_1";
+
+/**
+ * One SSE frame, in `nivara-ai`'s own wire shape (`SseEvent.render()` in
+ * `src/nivara_ai/turn/stream.py`) — kept here rather than inlined per test so
+ * a test building a specific transcript still matches the real frame shape.
+ */
+function frame(event: string, data: unknown): string {
+  return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+}
+
+/**
+ * A `POST /widget/turns/stream` response, as `nivara-ai` actually sends one:
+ * a `status` heartbeat, the Answer in one chunk, then `done`. The default
+ * every Widget test gets unless it registers its own — most of them are not
+ * testing what nivara-ai said, only that a message they sent still shows up.
+ */
+export function turnAnswered(answer = "Here's how.") {
+  const body =
+    frame("status", { state: "connecting" }) +
+    frame("token", { text: answer }) +
+    frame("done", { outcome: "answered", trace: {} });
+
+  return new HttpResponse(body, {
+    headers: { "Content-Type": "text/event-stream" },
+  });
+}
+
+/** A Turn that escalated: no Answer, just the notice — see `use-ai-turn.ts`. */
+export function turnEscalated(message = "A person now has this and will reply here.") {
+  const body =
+    frame("status", { state: "connecting" }) +
+    frame("escalated", { message }) +
+    frame("done", { outcome: "escalated", trace: {} });
+
+  return new HttpResponse(body, {
+    headers: { "Content-Type": "text/event-stream" },
+  });
+}
+
+/** `GET /widget/disclosure`'s ordinary answer. */
+export function disclosure(text = "This is a demo. Messages are answered by a language model.") {
+  return HttpResponse.json({ model_providers: ["Groq"], trace_vendor: "Langfuse Cloud", text });
+}
 
 /** The Snippet, as a Tenant pastes it. Left detached; a caller places it. */
 export function snippet(
