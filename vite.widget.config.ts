@@ -59,6 +59,17 @@ export default defineConfig({
     "process.env.NEXT_PUBLIC_API_URL": process.env.NEXT_PUBLIC_API_URL
       ? JSON.stringify(process.env.NEXT_PUBLIC_API_URL)
       : "undefined",
+    // `nivara-ai`'s own base URL, on the same discipline as the one above —
+    // Next.js inlining `NEXT_PUBLIC_AI_URL` into the *application* bundle
+    // never reaches this one, which Vite builds on its own. Left out here,
+    // `getAiEndpoints()`'s `process.env.NEXT_PUBLIC_AI_URL` read is not
+    // inlined at all, and there is no `process` global on a Tenant's page for
+    // it to fall back to at runtime — a deployment with the Vercel variable
+    // set correctly would still ship a Widget that can never see it (found
+    // live: this is exactly what happened before this line existed).
+    "process.env.NEXT_PUBLIC_AI_URL": process.env.NEXT_PUBLIC_AI_URL
+      ? JSON.stringify(process.env.NEXT_PUBLIC_AI_URL)
+      : "undefined",
     "process.env.NODE_ENV": JSON.stringify("production"),
   },
 
