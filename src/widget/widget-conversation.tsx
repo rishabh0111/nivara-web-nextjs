@@ -8,13 +8,12 @@ import type { Message } from "@/tickets/message";
 import { TICKET_STATE_LABELS } from "@/tickets/ticket";
 import { timeAgo } from "@/tickets/time-ago";
 
-import { useAiTurn } from "./use-ai-turn";
+import type { AiTurn } from "./use-ai-turn";
 import { useWidgetThread } from "./use-widget-tickets";
 import { useWidgetWrites } from "./use-widget-writes";
 import { WidgetCompose } from "./widget-compose";
 import { widgetKeys } from "./widget-keys";
 import { WidgetTurnNotice } from "./widget-turn-notice";
-import type { WidgetSession } from "./widget-session";
 import type { WidgetTickets } from "./widget-tickets";
 
 const SENT = "Sent.";
@@ -33,13 +32,13 @@ const MOVED_UNREAD =
  */
 export function Conversation({
   api,
-  session,
+  aiTurn,
   ticketId,
   /** Called with the conversation a message landed on, which need not be this one. */
   onFollow,
 }: {
   api: WidgetTickets;
-  session: WidgetSession;
+  aiTurn: AiTurn;
   ticketId: string;
   onFollow: (ticketId: string) => void;
 }) {
@@ -49,7 +48,6 @@ export function Conversation({
   });
   const thread = useWidgetThread(api, ticketId);
   const writes = useWidgetWrites(api);
-  const aiTurn = useAiTurn(session);
 
   // Asked for newest first, so a Visitor returning to a long conversation gets
   // the last thing said rather than the first. Read downwards, which is what a
@@ -124,7 +122,10 @@ export function Conversation({
         }}
       />
 
-      <WidgetTurnNotice state={aiTurn.state} />
+      {/* This Conversation's Turn only — including one started from `Start`
+          just before it navigated here, which is the ordinary way a Visitor's
+          first message is answered. */}
+      <WidgetTurnNotice state={aiTurn.stateFor(ticketId)} />
     </div>
   );
 }

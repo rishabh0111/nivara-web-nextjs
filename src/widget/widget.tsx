@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 
 import { useColdStartPhase } from "@/cold-start/use-cold-start";
 
+import { useAiTurn } from "./use-ai-turn";
 import { useLiveConversation } from "./use-live-conversation";
 import { useWidgetApi } from "./use-widget-tickets";
 import { Conversation } from "./widget-conversation";
@@ -70,6 +71,12 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
   const coldStart = useColdStartPhase();
   const api = useWidgetApi(session);
   const cache = useQueryClient();
+
+  // Held here rather than on the screen that starts it. `Start` navigates to
+  // `Conversation` the moment the Ticket exists, so a Turn triggered from
+  // there would be abandoned a tick later — including the escalation notice,
+  // which nothing else in the Widget ever delivers. See `useAiTurn`.
+  const aiTurn = useAiTurn(session);
 
   // Read as it changes, because the session can end without anybody here
   // pressing anything: a renewal refused ahead of expiry clears the credential
@@ -223,7 +230,7 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
           {where.at === "reading" ? (
             <Conversation
               api={api}
-              session={session}
+              aiTurn={aiTurn}
               ticketId={where.ticketId}
               // Where a message landed is the API's answer, and this follows it.
               onFollow={(ticketId) => setWhere({ at: "reading", ticketId })}
@@ -231,13 +238,13 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
           ) : where.at === "starting" ? (
             <Start
               api={api}
-              session={session}
+              aiTurn={aiTurn}
               onStarted={(ticketId) => setWhere({ at: "reading", ticketId })}
             />
           ) : (
             <Conversations
               api={api}
-              session={session}
+              aiTurn={aiTurn}
               onRead={(ticketId) => setWhere({ at: "reading", ticketId })}
               onStart={() => setWhere({ at: "starting" })}
             />

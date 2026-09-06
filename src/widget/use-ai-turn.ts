@@ -14,6 +14,15 @@
  * Escalation writes only an internal Note, which the Widget never renders, so
  * this hook's `escalated` state is the only place that notice exists at all
  * and it is not cleared automatically — see `WidgetTurnNotice`.
+ *
+ * Held by `Widget`, above the screen the Turn is started from, and never by
+ * that screen itself. The first message of a new Conversation is sent from
+ * `Start`, which navigates to `Conversation` the moment the Ticket exists —
+ * so a hook living in `Start` unmounts a tick after `trigger`, and the
+ * unmount below discards every event the Turn goes on to send. For an
+ * answered Turn that only costs the status line, since the real Message
+ * arrives over the realtime channel regardless; for an escalated one it
+ * discarded the only notice the Visitor was ever going to get.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -32,13 +41,23 @@ export type TurnState =
   | { at: "error"; message: string };
 
 export type AiTurn = {
-  state: TurnState;
+  /**
+   * What the Turn for `conversationId` is doing — `idle` for every other
+   * Conversation.
+   *
+   * Scoped rather than read whole, because this hook is held above the screens
+   * that use it: an `escalated` notice persists until something replaces it,
+   * and "a person has this now" is a claim about one Conversation that must
+   * not follow the Visitor into another.
+   */
+  stateFor(conversationId: string): TurnState;
   /** Starts a Turn for this Conversation. Safe to call repeatedly; only the latest wins. */
   trigger(conversationId: string): void;
 };
 
 export function useAiTurn(session: WidgetSession): AiTurn {
   const [state, setState] = useState<TurnState>({ at: "idle" });
+  const [answering, setAnswering] = useState<string | undefined>(undefined);
 
   // Which call's updates are still allowed to land. A Visitor who sends a
   // second message before the first Turn's stream finishes must not have the
@@ -60,6 +79,7 @@ export function useAiTurn(session: WidgetSession): AiTurn {
       const call = ++current.current;
       const stillCurrent = () => call === current.current;
 
+      setAnswering(conversationId);
       setState({ at: "working" });
 
       let streamed = "";
@@ -98,5 +118,11 @@ export function useAiTurn(session: WidgetSession): AiTurn {
     [session],
   );
 
-  return { state, trigger };
+  const stateFor = useCallback(
+    (conversationId: string): TurnState =>
+      answering === conversationId ? state : { at: "idle" },
+    [answering, state],
+  );
+
+  return { stateFor, trigger };
 }

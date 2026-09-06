@@ -8,12 +8,10 @@ import type { Ticket } from "@/tickets/ticket";
 import { TICKET_STATE_LABELS } from "@/tickets/ticket";
 import { timeAgo } from "@/tickets/time-ago";
 
-import { useAiTurn } from "./use-ai-turn";
+import type { AiTurn } from "./use-ai-turn";
 import { useWidgetConversations } from "./use-widget-tickets";
 import { useWidgetWrites } from "./use-widget-writes";
 import { WidgetCompose } from "./widget-compose";
-import { WidgetTurnNotice } from "./widget-turn-notice";
-import type { WidgetSession } from "./widget-session";
 import type { WidgetTickets } from "./widget-tickets";
 
 const OPENED_NOT_SAID =
@@ -31,12 +29,12 @@ const OPENED_NOT_SAID =
  */
 export function Conversations({
   api,
-  session,
+  aiTurn,
   onRead,
   onStart,
 }: {
   api: WidgetTickets;
-  session: WidgetSession;
+  aiTurn: AiTurn;
   onRead: (ticketId: string) => void;
   onStart: () => void;
 }) {
@@ -62,7 +60,7 @@ export function Conversations({
   // empty-state line above a "start" button would be three pieces of furniture
   // in front of the one thing they came for.
   if (conversations.items.length === 0) {
-    return <Start api={api} session={session} onStarted={onRead} />;
+    return <Start api={api} aiTurn={aiTurn} onStarted={onRead} />;
   }
 
   return (
@@ -109,15 +107,14 @@ export function Conversations({
  */
 export function Start({
   api,
-  session,
+  aiTurn,
   onStarted,
 }: {
   api: WidgetTickets;
-  session: WidgetSession;
+  aiTurn: AiTurn;
   onStarted: (ticketId: string) => void;
 }) {
   const writes = useWidgetWrites(api);
-  const aiTurn = useAiTurn(session);
   const disclosure = useDisclosure();
 
   return (
@@ -135,6 +132,9 @@ export function Start({
           const outcome = await writes.start(said);
 
           if (outcome.started) {
+            // Both, in this order, and the notice for it renders on the screen
+            // this navigates to rather than on this one — which is gone by the
+            // time the Turn has anything to say.
             aiTurn.trigger(outcome.ticket.id);
             onStarted(outcome.ticket.id);
             return { said: true, outcome: "Sent." };
@@ -152,8 +152,6 @@ export function Start({
           };
         }}
       />
-
-      <WidgetTurnNotice state={aiTurn.state} />
     </div>
   );
 }

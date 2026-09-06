@@ -16,6 +16,7 @@ import {
   snippet as makeSnippet,
   tenantId,
   turnAnswered,
+  turnEscalated,
   widgetSession,
 } from "./widget.fixtures";
 
@@ -686,5 +687,61 @@ describe("the Widget on a page that will not have it", () => {
 
     expect(store.get("widget")).toBeUndefined();
     expect(inside(next, LAUNCHER)).not.toBeNull();
+  });
+});
+
+/**
+ * The Turn that answers a Visitor's *first* message is started from `Start`,
+ * which navigates to the conversation the instant the Ticket exists. So the
+ * hook that runs it cannot live on that screen: it would unmount a tick after
+ * `trigger`, and `useAiTurn`'s unmount discards every event the Turn goes on
+ * to send.
+ *
+ * For an answered Turn that costs only the status line — the real Message
+ * arrives over the realtime channel regardless. For an escalated one it
+ * discarded the only notice the Visitor was ever going to get, and the panel
+ * sat there having said nothing at all. Found against the deployed stack;
+ * nothing in this suite had reached for it.
+ */
+describe("what nivara-ai says about a Visitor's first message", () => {
+  /**
+   * Waits on the clock rather than on a count of loop turns. The Turn's events
+   * arrive by reading a response stream, which takes real time to deliver —
+   * spinning the macrotask queue a fixed number of times returns long before
+   * the first frame lands, and reports the Turn as unreachable instead.
+   */
+  async function until(widget: BootedWidget, selector: string) {
+    const deadline = Date.now() + 2000;
+    while (!inside(widget, selector) && Date.now() < deadline) {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+    }
+  }
+
+  it("reaches the conversation the opening box handed over to", async () => {
+    server.use(
+      mints(),
+      http.get(`${baseUrl}/widget/tickets`, () => conversations()),
+      http.post(`${baseUrl}/widget/tickets`, () => HttpResponse.json(ticket({ source: "widget" }))),
+      http.post(`${baseUrl}/widget/tickets/tkt_1/messages`, () => HttpResponse.json(message())),
+      http.get(`${baseUrl}/widget/tickets/tkt_1`, () =>
+        HttpResponse.json(ticket({ source: "widget" })),
+      ),
+      http.get(`${baseUrl}/widget/tickets/tkt_1/messages`, () =>
+        HttpResponse.json({ data: [message()], nextCursor: null }),
+      ),
+      http.post(`${aiBaseUrl}/widget/turns/stream`, () => turnEscalated()),
+    );
+
+    const widget = boot();
+    await open(widget);
+    await say(widget, "My invoice is wrong.");
+    await until(widget, ".nvw-system-notice");
+
+    // An Escalation posts no Message, so this notice is the whole of what the
+    // Visitor is ever told. Before the Turn was held above both screens, it
+    // was discarded with the box they typed into and nothing rendered here.
+    expect(inside(widget, ".nvw-system-notice")?.textContent).toMatch(/person/i);
   });
 });
