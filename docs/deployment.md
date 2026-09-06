@@ -80,18 +80,49 @@ every other Surface uses, and does nothing else.
 origin from the application by construction, which is the only reason it exists: the Widget runs
 cross-origin, and the origin it is judged on has to be real before the Widget is built.
 
-Its origin is allowlisted on the isolation Tenant only. An origin nobody listed is refused by
-`POST /widget/sessions`, and that refusal is verified live rather than assumed — see [The gate,
-asked rather than assumed](#the-gate-asked-rather-than-assumed) below.
+### Two pages, one origin
 
-The isolation Tenant is **Sortwood**, `5eed0000-0000-4000-8000-000000000002`, and the three origins
-seeded onto it are the whole allowlist:
+`demo-host/index.html` bootstraps **Meridian**, the showcase Tenant, and
+`demo-host/isolation/index.html` bootstraps **Sortwood**. The pair is the demonstration: the same
+origin, byte-for-byte the same script, one attribute apart.
+
+The first answers, because Meridian is the only Tenant the Corpus is indexed under. The second
+cannot answer anything and escalates everything, which is what makes it worth serving — a
+reviewer sees isolation happen rather than reading that it would. The answering page is the one a
+visitor lands on, and it carries the hostile stylesheet, because that is the page that has to
+survive one in public.
+
+Both pages are pinned by [`src/widget/demo-host.test.ts`](../src/widget/demo-host.test.ts),
+including that they name *different* Tenants. If they ever named the same one the isolation page
+would quietly start answering, each page would still be internally consistent, and nothing else
+would fail.
+
+### The allowlist
+
+The demo origin is allowlisted on **both** Tenants, which is what lets the two pages sit beside
+each other. That does not weaken the isolation demonstration, because sharing an origin is not
+sharing an allowlist: each Tenant still admits an origin the other refuses, so a refusal stays
+attributable to the Tenant rather than to an origin nobody has heard of. An origin nobody listed is
+refused by `POST /widget/sessions`, and that refusal is verified live rather than assumed — see
+[The gate, asked rather than assumed](#the-gate-asked-rather-than-assumed) below.
+
+**Meridian**, `5eed0000-0000-4000-8000-000000000001`:
 
 | | |
 |---|---|
 | `https://rishabh0111.github.io` | The demo host on GitHub Pages. |
 | `http://localhost:4173` | The demo host served locally. A port of its own, because this application's own origin would make the demonstration same-origin and prove nothing. |
-| `https://sortwood.example` | Reserved, and listed so the allowlist has an entry no page can ever present. |
+| `https://nivara-web-nextjs.vercel.app` | The deployed front end, which serves `/widget`. |
+| `http://localhost:3000` | The front end in development. |
+| `https://meridian.example` | Reserved, and listed so the allowlist has an entry no page can ever present. |
+
+**Sortwood**, `5eed0000-0000-4000-8000-000000000002`:
+
+| | |
+|---|---|
+| `https://rishabh0111.github.io` | The isolation page, on the same host as the answering one. |
+| `http://localhost:4173` | The same, served locally. |
+| `https://sortwood.example` | Reserved. Meridian does not admit it, which is what keeps a cross-Tenant refusal demonstrable in both directions. |
 
 Matching is **exact equality** after case and trailing-slash normalization — no prefixes, no
 wildcards, and the opaque `null` origin a sandboxed frame presents is refused rather than compared.
@@ -102,7 +133,7 @@ The page carries the Snippet, and both of its values are set:
 | | |
 |---|---|
 | `src` | `https://nivara-web-nextjs.vercel.app/widget/widget.js` — the application's production origin. It was `https://nivara-web.example` while no correct value existed, a **reserved** RFC 2606 host that can never be registered by anyone; before that it was `https://nivara-web.vercel.app`, which is not an unset value but a live application belonging to somebody else, and a demo host shipping with it would have asked a stranger's origin for a script on every visit. Pinned by exact equality in [`src/widget/demo-host.test.ts`](../src/widget/demo-host.test.ts) rather than by a pattern, which would accept the next plausible neighbour just as readily. |
-| `data-tenant-id` | Set: the isolation Tenant above. Public by design; it grants nothing without the origin. |
+| `data-tenant-id` | Meridian on the answering page, Sortwood on the isolation page. Public by design; it grants nothing without the origin. |
 
 The page's stylesheet is **deliberately hostile** and is not to be tidied up: a global `!important`
 reset, an inherited font and colour, a `box-sizing` opinion, and rules aimed at the element names

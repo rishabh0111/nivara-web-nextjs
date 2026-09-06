@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Meridian — Support</title>
+    <title>Sortwood — Support</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -26,17 +26,6 @@
         opacity: 0.75;
         margin-top: 0;
       }
-      .ask {
-        margin: 2.5rem 0;
-        padding: 1.25rem 1.5rem;
-        border: 1px solid currentColor;
-        border-radius: 0.5rem;
-        opacity: 0.85;
-      }
-      .ask ul {
-        margin: 0.75rem 0 0;
-        padding-left: 1.2rem;
-      }
       .note {
         margin-top: 3rem;
         padding: 1rem 1.25rem;
@@ -55,9 +44,9 @@
       A tenant's own stylesheet is the thing most likely to break the Widget's
       appearance, and every rule below is one a real site plausibly has: a
       global reset with `!important`, a font and colour inherited from `body`,
-      a `box-sizing` opinion, and selectors aimed at the elements the Widget is
-      built from. They are here so a reviewer sees the Widget survive them
-      rather than being told it would.
+      a `box-sizing` opinion, and a `z-index` ceiling. They are here so that a
+      reviewer opening this page sees the Widget survive them rather than being
+      told it would.
 
       Delete these and the demo stops demonstrating anything.
     -->
@@ -91,38 +80,30 @@
   </head>
   <body>
     <main>
-      <h1>Meridian</h1>
-      <p class="lede">A pretend customer of Nivara Desk, on a site Nivara Desk does not own.</p>
+      <h1>Sortwood</h1>
+      <p class="lede">The isolation tenant. Same origin as the page next door, different tenant, and
+        deliberately no help centre behind it.</p>
 
       <p>
-        This page exists to be somewhere else. The Widget runs cross-origin by construction, and
-        the origin it is judged on has to be real before the Widget is built — a demo served from
-        the application's own origin would pass a gate it was never tested against.
+        <a href="../">The page next door</a> is served from this same origin and answers questions.
+        This one will not, and that is the point: it bootstraps a different tenant, and that tenant
+        has no help centre indexed behind it. Ask the launcher anything and it will hand you to a
+        person rather than guess.
       </p>
 
       <p>
-        The launcher in the corner is the Widget, running in this page's own document inside a
-        shadow root. Everything you are reading is styled by the deliberately hostile rules in the
-        source above; the Widget is not, and nothing of the Widget's reaches these paragraphs.
+        Nothing about the two pages differs except one attribute. The origin is identical, the
+        script is byte-for-byte the same file, and the allowlist admits both. What decides which
+        tenant answers — and therefore which corpus is even searched — is
+        <code>data-tenant-id</code>, resolved server-side. One tenant cannot reach the other's
+        documents, tickets or contacts, because Postgres will not return them.
       </p>
-
-      <div class="ask">
-        <strong>Ask it one of these.</strong> They are covered by this tenant's help centre, so it
-        will answer rather than escalate:
-        <ul>
-          <li>What column headers does the contact importer expect?</li>
-          <li>How do I change who receives invoice emails?</li>
-          <li>Why might a staff member not see SSO on sign-in?</li>
-        </ul>
-        Then ask it how long the refund window is. It will hand you to a person instead — money
-        questions escalate by contract, not by the model's judgement.
-      </div>
 
       <p class="note">
-        Whatever you send opens a real ticket on the showcase tenant's queue, and the reply you get
-        is the one the agent dashboard shows. Nothing here is a simulation.
-        <a href="./isolation/">The page next door</a> is the same origin bootstrapping a different
-        tenant, and it cannot answer at all.
+        The allowlist is a separate question from the tenant. Each of these two tenants admits an
+        origin the other refuses, so a refusal is attributable to the tenant rather than to an
+        origin nobody has heard of. Copy the snippet onto an unlisted origin and
+        <code>POST /widget/sessions</code> refuses it outright.
       </p>
     </main>
 
@@ -134,24 +115,23 @@
       on the request is this page's, which is the whole reason the Widget
       renders here rather than inside a frame served from over there.
 
-      `data-tenant-id` is Meridian, the showcase Tenant, because it is the only
-      Tenant the Corpus is indexed under and therefore the only one that can
-      answer anything. It is public by design and grants nothing on its own —
-      the request is judged on the origin, which no script can forge.
+      `data-tenant-id` is Sortwood, the isolation Tenant. This origin is
+      allowlisted on Sortwood *and* on Meridian, which is what lets the page
+      next door answer from the same host — so the id is what selects the
+      tenant here, not the origin. It is public by design and grants nothing on
+      its own: the request is judged on the origin, which no script can forge.
 
-      This origin is allowlisted on Meridian *and* on Sortwood, which is what
-      lets `isolation/` sit beside this page and refuse to answer from the same
-      host. The id selects the tenant; the origin only decides whether a session
-      may be minted at all.
-
-      To run the whole thing locally instead, `npm run widget:build` and
+      `src` is the deployed application's own origin. It was a reserved
+      `.example` host while there was no correct value to put here — a host that
+      resolves would have had this page fetch a script from whoever happened to
+      own it. To run the whole thing locally instead, `npm run widget:build` and
       `npm run dev`, serve this directory on port 4173 — the port allowlisted
       for it — and point `src` at `http://localhost:3000/widget/widget.js`. See
       `docs/deployment.md`.
     -->
     <script
       src="https://nivara-web-nextjs.vercel.app/widget/widget.js"
-      data-tenant-id="5eed0000-0000-4000-8000-000000000001"
+      data-tenant-id="5eed0000-0000-4000-8000-000000000002"
       defer
     ></script>
   </body>
