@@ -21,6 +21,10 @@ from the token on every request and is never a value the client holds, passes, o
 **[Open the live demo](https://nivara-web-nextjs.vercel.app/dashboard?demo)**, already signed in as the
 seeded admin. Nothing to copy.
 
+![A visitor asks the widget two questions; one is answered, one is handed to a person, and both appear as tickets on the agent dashboard.](docs/img/walkthrough.gif)
+
+<sub>45 seconds, recorded by Playwright against the live deployment: a question the help centre covers is answered, a refund question is handed to a person, and both show up as tickets on the agent queue.</sub>
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/ticket.dark.png">
   <img src="docs/img/ticket.light.png" alt="The agent dashboard with a resolved ticket open: the customer's question, the answer posted by Automation, and the state, priority and assignee controls.">
