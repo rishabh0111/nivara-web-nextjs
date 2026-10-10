@@ -22,16 +22,12 @@ export function ScreenSkeleton() {
         Loading this screen…
       </p>
 
-      <div aria-hidden="true" className="animate-sheen space-y-6">
+      <div aria-hidden="true" className="animate-sheen space-y-5">
         <div className="h-8 w-40 rounded-lg bg-sunken" />
 
-        <div className="card space-y-3 p-4">
-          <div className="h-3 w-24 rounded bg-sunken" />
-          <div className="flex flex-wrap gap-2">
-            {[64, 80, 72, 56, 68].map((width, index) => (
-              <div key={index} className="h-7 rounded-full bg-sunken" style={{ width }} />
-            ))}
-          </div>
+        <div className="card flex items-center gap-3 px-4 py-4">
+          <div className="h-4 w-20 rounded bg-sunken" />
+          <div className="h-3 w-40 rounded bg-sunken" />
         </div>
 
         <div className="card divide-y divide-line overflow-hidden">

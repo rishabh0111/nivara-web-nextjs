@@ -120,12 +120,53 @@ const invoice = ticket({
   updatedAt: "2026-07-21T09:00:00.000Z",
 });
 
+/** The control that folds and unfolds the filters, named by what it says is in force. */
+const filtersToggle = () => screen.getByRole("button", { name: /^filters/i });
+
+/** The queue, with its filters unfolded — they start folded, and these tests work them. */
 async function openQueue(asked: URLSearchParams[]) {
   server.use(asAgent, queueOf([printer, invoice], asked));
   renderDashboard(store);
   await screen.findByRole("list", { name: /^tickets$/i });
-  return userEvent.setup();
+  const user = userEvent.setup();
+  await user.click(filtersToggle());
+  return user;
 }
+
+describe("the filters at rest", () => {
+  /**
+   * The queue is the work. Unfolded, the controls filled the first screen and
+   * every Ticket started below it.
+   */
+  it("starts folded, with the Tickets in front of the controls", async () => {
+    server.use(asAgent, queueOf([printer, invoice], []));
+    renderDashboard(store);
+    await screen.findByRole("list", { name: /^tickets$/i });
+
+    expect(filtersToggle()).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("checkbox", { name: "Pending" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: /^state$/i })).not.toBeInTheDocument();
+  });
+
+  it("says what is in force while folded, and unfolds on a press", async () => {
+    const asked: URLSearchParams[] = [];
+    const user = await openQueue(asked);
+    expect(filtersToggle()).toHaveAttribute("aria-expanded", "true");
+    expect(filtersToggle()).toHaveTextContent(/all tickets, newest first/i);
+
+    await user.click(screen.getByRole("checkbox", { name: "Pending" }));
+    await user.click(screen.getByRole("radio", { name: /unassigned/i }));
+    await user.click(filtersToggle());
+
+    expect(filtersToggle()).toHaveAttribute("aria-expanded", "false");
+    expect(filtersToggle()).toHaveTextContent(/2 filters on, newest first/i);
+
+    // Undoing them never needs the panel open.
+    await user.click(screen.getByRole("button", { name: /clear filters/i }));
+    await waitFor(() => expect(lastAsked(asked).get("state")).toBeNull());
+    expect(filtersToggle()).toHaveTextContent(/all tickets/i);
+  });
+});
 
 describe("narrowing the queue", () => {
   it("filters by state", async () => {

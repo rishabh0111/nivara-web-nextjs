@@ -14,7 +14,12 @@
  */
 import { memo } from "react";
 
-import { TICKET_PRIORITY_LABELS, TICKET_STATE_LABELS, type Ticket } from "./ticket";
+import {
+  TICKET_PRIORITY_LABELS,
+  TICKET_SOURCE_LABELS,
+  TICKET_STATE_LABELS,
+  type Ticket,
+} from "./ticket";
 import type { TicketPriority, TicketState } from "./ticket";
 import { timeAgo } from "./time-ago";
 
@@ -64,7 +69,18 @@ export const TICKET_ROW_LAYOUT = "grid grid-cols-[1fr_auto] items-start gap-x-3"
  * identity until the record itself changes, so the comparison is a pointer
  * check and the rows that did not change do no work.
  */
-export const TicketRow = memo(function TicketRow({ ticket }: { ticket: Ticket }) {
+export const TicketRow = memo(function TicketRow({
+  ticket,
+  showSource = false,
+}: {
+  ticket: Ticket;
+  /**
+   * Whether to say which channel it arrived on. The staff queue does — portal,
+   * widget and Slack land in one list, and where a question came from is half
+   * of how it is read. The Portal does not: a Contact knows where they wrote.
+   */
+  showSource?: boolean;
+}) {
   return (
     <>
       <span className="col-start-1 row-start-1 truncate font-semibold tracking-tight">
@@ -89,6 +105,15 @@ export const TicketRow = memo(function TicketRow({ ticket }: { ticket: Ticket })
         <span aria-hidden="true" className="text-ink-faint">
           ·
         </span>
+
+        {showSource ? (
+          <>
+            <span>via {TICKET_SOURCE_LABELS[ticket.source]}</span>
+            <span aria-hidden="true" className="text-ink-faint">
+              ·
+            </span>
+          </>
+        ) : null}
 
         {/* The instant, machine-readable, beside the reading of it — "3 hours
               ago" is only true for as long as the page has been open. */}

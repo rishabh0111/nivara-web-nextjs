@@ -33,6 +33,15 @@ describe("a Ticket as one row of a list", () => {
     expect(screen.getByText("High")).toBeVisible();
   });
 
+  it("says which channel it arrived on only where the caller asks", () => {
+    const { rerender } = render(<TicketRow ticket={ticket({ source: "slack" })} showSource />);
+    expect(screen.getByText("via Slack")).toBeVisible();
+
+    // The Portal's list: a Contact knows where they wrote.
+    rerender(<TicketRow ticket={ticket({ source: "slack" })} />);
+    expect(screen.queryByText("via Slack")).toBeNull();
+  });
+
   it("names the subject first, so the row is announced by what it is about", () => {
     const { container } = render(<TicketRow ticket={ticket()} />);
 

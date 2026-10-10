@@ -363,8 +363,13 @@ describe("working the queue by keyboard", () => {
     await user.tab();
     expect(screen.getByRole("button", { name: /^theme:/i })).toHaveFocus();
 
-    // Then the filters, which sit above the list because they describe it —
-    // and past them, the end of the list.
+    // Then the filters, which sit above the list because they describe it.
+    // Folded, they are one stop rather than twenty; unfolded, the first
+    // control is next — and past them, the end of the list.
+    await user.tab();
+    const filters = screen.getByRole("button", { name: /^filters/i });
+    expect(filters).toHaveFocus();
+    await user.keyboard("{Enter}");
     await user.tab();
     expect(screen.getByRole("checkbox", { name: "Open" })).toHaveFocus();
 

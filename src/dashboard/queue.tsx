@@ -72,10 +72,17 @@ export function Queue({
   );
 
   return (
-    <div className="space-y-6">
-      <QueueFilters slice={slice} onChange={setSlice} principal={principal} />
+    <div className="space-y-4">
+      {/* One row on a wide screen: the folded filters and whether the list is
+          current are both about the list, and stacked they cost the first
+          screen a row of Tickets. */}
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="min-w-0 flex-[1_1_24rem]">
+          <QueueFilters slice={slice} onChange={setSlice} principal={principal} />
+        </div>
 
-      <QueueFreshness failed={Boolean(queue.error)} />
+        <QueueFreshness failed={Boolean(queue.error)} />
+      </div>
 
       <CollectionView
         collection={queue}
@@ -122,7 +129,7 @@ export function Queue({
                     onClick={() => onOpen(ticket)}
                     className={`${TICKET_ROW_LAYOUT} block w-full px-4 py-3.5 text-left transition-colors duration-150 hover:bg-sunken focus-visible:-outline-offset-2`}
                   >
-                    <TicketRow ticket={ticket} />
+                    <TicketRow ticket={ticket} showSource />
                   </button>
                 )}
               </WindowedList>

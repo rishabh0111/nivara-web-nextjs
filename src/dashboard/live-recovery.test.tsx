@@ -282,7 +282,7 @@ describe("a staff Room the server can no longer replay", () => {
     await waitFor(() =>
       expect(
         screen.getByRole("status", { name: /whether this list is current/i }),
-      ).toHaveTextContent(/the queue has changed/i),
+      ).toHaveTextContent(/new activity since this list loaded/i),
     );
 
     live.disconnectAll();
@@ -298,7 +298,7 @@ describe("a staff Room the server can no longer replay", () => {
     // watched it catch up without being asked.
     expect(
       screen.getByRole("status", { name: /whether this list is current/i }),
-    ).not.toHaveTextContent(/the queue has changed/i);
+    ).not.toHaveTextContent(/new activity since this list loaded/i);
   });
 
   it("waits for the list, rather than reporting a failure", async () => {
@@ -310,7 +310,7 @@ describe("a staff Room the server can no longer replay", () => {
     await waitFor(() =>
       expect(
         screen.getByRole("status", { name: /whether this list is current/i }),
-      ).toHaveTextContent(/the queue has changed/i),
+      ).toHaveTextContent(/new activity since this list loaded/i),
     );
 
     // An API that has not answered yet, so what the queue does between

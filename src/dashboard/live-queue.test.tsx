@@ -136,7 +136,7 @@ function saidAboutTheList(): string {
 
 /** The reader being told the list is behind, if they are being told. */
 function toldItChanged(): boolean {
-  return /the queue has changed/i.test(saidAboutTheList());
+  return /new activity since this list loaded/i.test(saidAboutTheList());
 }
 
 /**

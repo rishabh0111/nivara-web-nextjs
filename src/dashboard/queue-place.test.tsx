@@ -79,7 +79,10 @@ async function openQueue(asked: URLSearchParams[]) {
   );
   renderDashboard(store);
   await screen.findByRole("list", { name: /^tickets$/i });
-  return userEvent.setup();
+  const user = userEvent.setup();
+  // The filters start folded; these tests read and work the controls inside.
+  await user.click(screen.getByRole("button", { name: /^filters/i }));
+  return user;
 }
 
 function firstAsked(asked: URLSearchParams[]): URLSearchParams {
@@ -124,6 +127,11 @@ describe("a link to a slice of the queue", () => {
     at("/dashboard?state=pending&assigneeId=none&contactId=con_2&createdAfter=2026-07-01");
 
     await openQueue([]);
+
+    // Said on the bar itself, so a shared link is never a filter nobody can see.
+    expect(screen.getByRole("button", { name: /^filters/i })).toHaveTextContent(
+      /4 filters on/i,
+    );
 
     expect(screen.getByRole("checkbox", { name: "Pending" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Open" })).not.toBeChecked();

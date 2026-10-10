@@ -143,7 +143,7 @@ export function QueueFreshness({
   const [asked, setAsked] = useState(false);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+    <div className="ml-auto flex min-h-13 flex-wrap items-center justify-end gap-3 text-sm">
       {/*
         "Up to date" is said only once a read has come back, and come back
         without being refused — which is what makes it a claim about the
@@ -155,13 +155,13 @@ export function QueueFreshness({
       <p
         role="status"
         aria-label="Whether this list is current"
-        // The chip only appears once there is something to say. Tinted urgent
-        // when the list has been overtaken, because a stale queue is the one
-        // state here that costs a reader something, and calm when it is
-        // current — the two readings are never the same colour by accident.
+        // The chip only appears once there is something to say. Accent when
+        // the list has been overtaken: it is news with an action beside it,
+        // not a fault, and orange is kept for time running out. Calm when it
+        // is current — the two readings are never the same colour by accident.
         className={
           overtaken
-            ? "chip chip-urgent"
+            ? "chip chip-accent"
             : asked && !rereading && !failed
               ? "chip chip-calm"
               : "text-ink-muted"
@@ -179,10 +179,9 @@ export function QueueFreshness({
               strokeLinejoin="round"
               className="size-3.5"
             >
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 7v5l3 2" />
+              <path d="M12 5v14M5 12h14" />
             </svg>
-            The queue has changed since it was loaded.
+            New activity since this list loaded.
           </>
         ) : asked && !rereading && !failed ? (
           <>

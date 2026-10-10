@@ -38,11 +38,27 @@ export function QueueFilters({
   principal: StaffPrincipal | undefined;
 }) {
   const narrowed = isNarrowed(slice);
+  const panelId = useId();
+
+  // Folded by default, whatever the address bar says. The queue is the work
+  // and the controls are how a reader narrows it; opened, they filled the whole
+  // first screen and pushed every Ticket below the fold. The folded bar still
+  // says what is in force, so a slice arriving on a shared link is never a
+  // filter nobody can see.
+  const [open, setOpen] = useState(false);
 
   return (
-    <section aria-label="Filter and sort tickets" className="card overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-sunken px-4 py-3">
-        <p className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+    <section aria-label="Filter and sort tickets" className="card @container overflow-hidden">
+      <div
+        className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-2 py-1.5 ${open ? "border-b border-line bg-sunken" : ""}`}
+      >
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpen((was) => !was)}
+          className="flex min-h-10 min-w-0 items-center gap-2 rounded-lg px-2 text-left text-sm transition-colors duration-150 hover:bg-sunken"
+        >
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
@@ -51,27 +67,41 @@ export function QueueFilters({
             strokeWidth="1.75"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="size-4 text-ink-muted"
+            className="size-4 shrink-0 text-ink-muted"
           >
             <path d="M3 5h18M6 12h12M10 19h4" />
           </svg>
-          Filters
-        </p>
+          <span className="font-semibold tracking-tight">Filters</span>
+          <span className="truncate text-ink-muted">{describeSlice(slice)}</span>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`size-4 shrink-0 text-ink-muted transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
 
         {/* Absent rather than disabled when there is nothing to clear: a control
-            that never does anything is one more thing to tab past. */}
+            that never does anything is one more thing to tab past. Kept on the
+            folded bar, so undoing a filter never means opening the panel. */}
         {narrowed ? (
           <button
             type="button"
             onClick={() => onChange({ ...EVERYTHING, sort: slice.sort })}
-            className="link text-sm"
+            className="link px-2 text-sm"
           >
             Clear filters
           </button>
         ) : null}
       </div>
 
-      <div className="space-y-5 p-4">
+      <div id={panelId} hidden={!open} className="space-y-5 p-4">
         <ChoiceGroup
           legend="State"
           labels={TICKET_STATE_LABELS}
@@ -101,7 +131,7 @@ export function QueueFilters({
             rule. They are the ones reached for rarely and read slowly, and
             mixing them into the pills above would slow down the ones that are
             one click. */}
-        <div className="grid gap-4 border-t border-line pt-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 border-t border-line pt-5 @lg:grid-cols-2 @4xl:grid-cols-4">
           <SettledField
             name="contactId"
             label="Contact"
@@ -356,4 +386,31 @@ function SortChoice({ sort, onChange }: { sort: QueueSort; onChange: (sort: Queu
       </select>
     </div>
   );
+}
+
+/**
+ * What the folded bar says is in force: how many filters, and the order.
+ *
+ * Counted per control rather than per value — three states ticked is one
+ * filter, because it is one question asked of one field.
+ */
+export function describeSlice(slice: QueueSlice): string {
+  const on = [
+    slice.state.length > 0,
+    slice.priority.length > 0,
+    slice.source.length > 0,
+    slice.assignee.kind !== "anyone",
+    slice.contactId.trim() !== "",
+    slice.createdAfter !== "",
+    slice.createdBefore !== "",
+  ].filter(Boolean).length;
+
+  const order =
+    SORT_OPTIONS.find(
+      (option) => toSortParameter(option.sort) === toSortParameter(slice.sort),
+    )?.label.toLowerCase() ?? "";
+
+  const what = on === 0 ? "All tickets" : on === 1 ? "1 filter on" : `${on} filters on`;
+
+  return order ? `${what}, ${order}` : what;
 }
