@@ -1,4 +1,6 @@
 import { getApiEndpoints } from "@/config/api";
+import { SignInStage } from "@/dashboard/sign-in-stage";
+import { Wordmark } from "@/ui/logo";
 import { ThemeToggle } from "@/ui/theme";
 
 /**
@@ -38,7 +40,7 @@ const surfaces = [
   {
     name: "Analytics",
     href: "/dashboard/analytics?demo",
-    held: "A User holding analytics:read",
+    held: "An admin",
     does: "Four rates, two percentiles, and what an empty cohort is not.",
     icon: <path d="M3 3v18h18M7 16v-5M12 16V8M17 16v-8" />,
   },
@@ -48,117 +50,113 @@ export default function HomePage() {
   const { httpBaseUrl } = getApiEndpoints();
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 pt-8 pb-24">
-      <div className="mb-10 flex justify-end">
-        <ThemeToggle />
-      </div>
-
-      <header className="max-w-2xl">
-        <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium tracking-wide text-ink-muted uppercase shadow-lift">
-          <span aria-hidden="true" className="size-1.5 rounded-full bg-calm" />
-          Support desk
+    <>
+      <header className="flex h-12 items-center gap-2 px-4 sm:px-6">
+        <p className="min-w-0 text-sm">
+          <Wordmark />
         </p>
-
-        <h1 className="mt-6 text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-          Nivara Desk
-        </h1>
-
-        <p className="mt-5 text-lg leading-relaxed text-pretty text-ink">
-          A multitenant customer-support helpdesk with an AI layer. Customers ask from a portal, a
-          widget on the company&rsquo;s own site, or Slack; the AI answers what the help centre
-          covers and hands the rest to an agent&rsquo;s queue.
-        </p>
-
-        <p className="mt-3 text-base leading-relaxed text-pretty text-ink-muted">
-          These are its four front ends and one client. All four run against the same API and are
-          told apart by which credential they hold — not by which pages they render.
-        </p>
-
-        <p className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-          {/* The one thing most visitors came for, before the four doors below:
-              the agent's queue, already signed in as the seeded admin. */}
-          <a href="/dashboard?demo" className="btn btn-primary">
-            Open the live demo
-          </a>
-          <span className="text-sm text-ink-muted">
-            Signed in as the demo admin of Meridian, a demo company. Nothing to create.
-          </span>
-        </p>
+        <span className="ml-auto">
+          <ThemeToggle />
+        </span>
       </header>
 
-      <h2 className="sr-only">The four surfaces</h2>
+      <main className="sheet">
+        <div className="mx-auto w-full max-w-[64rem] px-4 pt-10 pb-16 sm:px-8 sm:pt-16">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:items-start">
+            <div className="max-w-xl">
+              <h1 className="text-[2.5rem] leading-none font-light tracking-[-0.035em] sm:text-[3.5rem]">
+                Nivara Desk
+              </h1>
 
-      <ul className="mt-14 grid gap-4 sm:grid-cols-2">
-        {surfaces.map((surface, arrival) => (
-          /*
-            Staggered by a twentieth of a second each. Enough that the four
-            read as arriving in an order rather than appearing at once, and
-            short enough that nobody waiting on the last one notices waiting.
-          */
-          <li
-            key={surface.name}
-            className="animate-rise"
-            style={{ animationDelay: `${arrival * 60}ms` }}
-          >
-            {/*
-              The whole card is the link. A card with a link inside it gives a
-              reader a small target and a screen reader two things to announce
-              where there is only one destination.
-            */}
-            <a
-              href={surface.href}
-              className="group flex h-full flex-col rounded-card border border-line bg-surface p-5 shadow-lift transition duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lift-high"
-            >
-              <span className="flex items-center gap-3">
-                <span
-                  aria-hidden="true"
-                  className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent-wash text-accent transition-transform duration-200 group-hover:scale-110"
+              <p className="mt-6 text-lg leading-relaxed text-pretty text-ink">
+                A multitenant customer-support helpdesk with an AI layer. Customers ask from a
+                portal, a widget on the company&rsquo;s own site, or Slack; the AI answers what the
+                help centre covers and hands the rest to an agent&rsquo;s queue.
+              </p>
+
+              <p className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
+                {/* The one thing most visitors came for: the agent's queue,
+                    already signed in as the seeded admin. */}
+                <a href="/dashboard?demo" className="btn btn-primary !min-h-12 px-6 text-[0.9375rem]">
+                  Open the live demo
+                </a>
+                <span className="text-sm text-ink-muted">
+                  Signed in as the demo admin of Meridian. Nothing to create.
+                </span>
+              </p>
+            </div>
+
+            {/* What the demo will show, before it is opened: the three ways a
+                question ends, the strip every ticket in the queue carries. */}
+            <SignInStage />
+          </div>
+
+          <h2 className="mt-16 text-[0.9375rem] font-medium">The four surfaces</h2>
+
+          {/* A ruled list rather than four cards: four doors, each named by
+              what it does and by the credential that holds it. */}
+          <ul className="mt-3 border-t border-line">
+            {surfaces.map((surface, arrival) => (
+              <li
+                key={surface.name}
+                className="animate-rise border-b border-line"
+                style={{ animationDelay: `${arrival * 60}ms` }}
+              >
+                {/*
+                  The whole row is the link. A row with a link inside it gives a
+                  reader a small target and a screen reader two things to
+                  announce where there is only one destination.
+                */}
+                <a
+                  href={surface.href}
+                  className="group grid gap-x-6 gap-y-1 py-4 transition-colors duration-150 hover:bg-sunken sm:grid-cols-[10rem_minmax(0,1fr)_auto] sm:items-center sm:px-3"
                 >
+                  <span className="flex items-center gap-2.5 text-[1.0625rem] font-medium">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="size-4 text-ink-muted"
+                    >
+                      {surface.icon}
+                    </svg>
+                    {surface.name}
+                  </span>
+
+                  <span className="text-sm leading-relaxed">
+                    {surface.does}{" "}
+                    <span className="text-ink-muted">Held by {surface.held.toLowerCase()}.</span>
+                  </span>
+
                   <svg
+                    aria-hidden="true"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="1.75"
+                    strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="size-5"
+                    className="hidden size-4 text-ink-muted transition-transform duration-200 group-hover:translate-x-0.5 sm:block"
                   >
-                    {surface.icon}
+                    <path d="M5 12h14M13 6l6 6-6 6" />
                   </svg>
-                </span>
+                </a>
+              </li>
+            ))}
+          </ul>
 
-                <span className="text-base font-semibold tracking-tight">{surface.name}</span>
-
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="ml-auto size-4 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent"
-                >
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </span>
-
-              <span className="mt-4 text-sm leading-relaxed text-ink-muted">{surface.does}</span>
-
-              <span className="mt-4 border-t border-line pt-3 text-xs leading-relaxed text-ink-faint">
-                Held by {surface.held.toLowerCase()}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
-
-      <footer className="mt-16 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-card border border-line bg-sunken px-5 py-4 text-sm text-ink-muted">
-        <span>Pointed at</span>
-        <code className="rounded-md border border-line bg-surface px-2 py-1 font-mono text-xs break-all text-ink">
-          {httpBaseUrl}
-        </code>
-      </footer>
-    </main>
+          <footer className="mt-12 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-ink-muted">
+            <span>Pointed at</span>
+            <code className="rounded-md bg-sunken px-2 py-1 text-xs break-all text-ink">
+              {httpBaseUrl}
+            </code>
+          </footer>
+        </div>
+      </main>
+    </>
   );
 }
