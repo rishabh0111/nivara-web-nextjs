@@ -4,6 +4,7 @@ import { DEMO_STAFF } from "@/session/demo-credentials";
 import { PasswordSignInForm } from "@/session/password-sign-in-form";
 
 import { useDashboardSession } from "./dashboard-session-context";
+import { SignInBrief, SignInStage } from "./sign-in-stage";
 
 /**
  * One message for every refusal.
@@ -25,6 +26,8 @@ export function SignInForm() {
       refused={REFUSED}
       standing="The staff side of a customer-support helpdesk. Work tickets, reply to customers, and keep things moving."
       demo={DEMO_STAFF}
+      aside={<SignInStage />}
+      brief={<SignInBrief />}
       signIn={session.signIn}
     />
   );
