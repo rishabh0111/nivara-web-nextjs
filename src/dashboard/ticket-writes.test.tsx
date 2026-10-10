@@ -15,6 +15,7 @@
  * the value somebody chose would send them away thinking the Ticket had moved.
  */
 import { screen, waitFor, within } from "@testing-library/react";
+import type userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
@@ -187,7 +188,7 @@ describe("who a Ticket belongs to", () => {
   it("hands one to a colleague by their id", async () => {
     const { user, written } = await openTicket();
 
-    await user.type(screen.getByLabelText(/assign to a colleague/i), "usr_2");
+    await typeAnId(user, "usr_2");
     await user.click(screen.getByRole("button", { name: /^assign$/i }));
 
     await waitFor(() => expect(written).toHaveLength(1));
@@ -353,7 +354,7 @@ describe("from the keyboard alone", () => {
   it("hands a Ticket over on Enter, without reaching for the button", async () => {
     const { user, written } = await openTicket();
 
-    await user.type(screen.getByLabelText(/assign to a colleague/i), "usr_2{Enter}");
+    await typeAnId(user, "usr_2{Enter}");
 
     await waitFor(() => expect(written).toHaveLength(1));
     expect(written[0]).toEqual({ kind: "assignee", ticketId: "tkt_1", assigneeId: "usr_2" });
@@ -424,3 +425,15 @@ describe("an edit the reader has not waited for", () => {
     await waitFor(() => expect(summary()).toHaveTextContent(/pending/i));
   });
 });
+
+/**
+ * Names a colleague by id: the select lists those seen on loaded tickets, and
+ * one not among them is "Someone else, by id" and then typed.
+ */
+async function typeAnId(user: ReturnType<typeof userEvent.setup>, typed: string) {
+  const colleague = screen.getByLabelText(/assign to a colleague/i);
+  if ((colleague as HTMLSelectElement).value !== "(someone else)") {
+    await user.selectOptions(colleague, "Someone else, by id");
+  }
+  await user.type(screen.getByLabelText(/^user id$/i), typed);
+}

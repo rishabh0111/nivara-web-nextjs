@@ -84,9 +84,9 @@ export function TicketActions({ ticket }: { ticket: Ticket }) {
 
   return (
     <section aria-labelledby={headingId} className="card overflow-hidden">
-      <h3
+      <h2
         id={headingId}
-        className="flex items-center gap-2 border-b border-line bg-sunken px-4 py-3 text-sm font-semibold tracking-tight"
+        className="flex items-center gap-2 border-b border-line bg-frame px-4 py-3 text-[0.9375rem] font-medium"
       >
         <svg
           aria-hidden="true"
@@ -101,7 +101,7 @@ export function TicketActions({ ticket }: { ticket: Ticket }) {
           <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
         </svg>
         Change this ticket
-      </h3>
+      </h2>
 
       <div className="space-y-4 p-4">
         {/*
@@ -261,7 +261,7 @@ function EditedChoice<Value extends string>({
 
   return (
     <form onSubmit={onSubmit} className="space-y-1">
-      <label htmlFor={id} className="block text-sm font-semibold tracking-tight text-ink">
+      <label htmlFor={id} className="block text-sm font-medium text-ink">
         {label}
       </label>
       <div className="flex flex-wrap items-center gap-2">
@@ -279,7 +279,15 @@ function EditedChoice<Value extends string>({
           ))}
         </select>
 
-        <button type="submit" disabled={writing || value === current} className="btn btn-quiet">
+        {/* Explicit, never applied on select: a change of state reaches the
+            customer, so it takes a second, deliberate press. Enabled only once
+            the select says something the Ticket does not. */}
+        <button
+          type="submit"
+          disabled={writing || value === current}
+          title={value === current ? `Choose a different ${label.toLowerCase()} first` : undefined}
+          className="btn btn-quiet"
+        >
           {writing ? "Changing…" : action}
         </button>
       </div>
@@ -303,14 +311,18 @@ function EditedChoice<Value extends string>({
  * A field that asks for what the API actually takes is the honest version until
  * there is something to populate a picker from.
  */
+/** The select's value for "someone not listed". User ids are UUIDs, so none can be this. */
+const ANOTHER = "(someone else)";
+
 function AssigneeControl({ ticket, report }: { ticket: Ticket; report: Report }) {
   const writes = useTicketWrites(ticket.id);
   const principal = useStaffPrincipal();
   const id = useId();
-  const hintId = `${id}-hint`;
-  const suggestionsId = `${id}-known`;
   const known = useKnownAssignees();
+  // Anyone but the reader, who has their own button above.
+  const others = known.filter((one) => one.userId !== principal?.userId);
 
+  const [picked, setPicked] = useState(others.length > 0 ? "" : ANOTHER);
   const [typed, setTyped] = useState("");
   const [writing, setWriting] = useState(false);
 
@@ -324,14 +336,17 @@ function AssigneeControl({ ticket, report }: { ticket: Ticket; report: Report })
     // Emptied only where it landed: leaving an id in the box after a successful
     // hand-over invites the next reader to make it again, and clearing it after
     // a refusal would throw away something they would have to retype.
-    if (written.ok) setTyped("");
+    if (written.ok) {
+      setTyped("");
+      setPicked(others.length > 0 ? "" : ANOTHER);
+    }
   }
 
   const mine = principal !== undefined && principal.userId === ticket.assigneeId;
 
   return (
     <fieldset className="space-y-2">
-      <legend className="text-sm font-semibold tracking-tight text-ink">Assignee</legend>
+      <legend className="text-sm font-medium text-ink">Assignee</legend>
 
       <p className="text-sm text-ink-muted">
         {ticket.assigneeId
@@ -347,7 +362,9 @@ function AssigneeControl({ ticket, report }: { ticket: Ticket; report: Report })
             type="button"
             disabled={writing}
             onClick={() => void assign(principal.userId, "This ticket is now yours.")}
-            className="btn btn-quiet"
+            // Filled when nobody has it: claiming an unclaimed ticket is the
+            // commonest thing done on this screen.
+            className={ticket.assigneeId ? "btn btn-quiet" : "btn btn-ink"}
           >
             Assign to me
           </button>
@@ -368,44 +385,60 @@ function AssigneeControl({ ticket, report }: { ticket: Ticket; report: Report })
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          const colleague = typed.trim();
+          const colleague = (picked === ANOTHER ? typed : picked).trim();
           if (colleague !== "") void assign(colleague, `This ticket is now with ${colleague}.`);
         }}
-        className="space-y-1"
+        className="space-y-2"
       >
-        <label htmlFor={id} className="block text-sm font-semibold tracking-tight text-ink">
+        {/* The colleagues this screen has seen on loaded tickets, by name where
+            the name is known. There is no directory on this API, so anyone
+            else is one choice away, by id. */}
+        <label htmlFor={id} className="block text-sm font-medium text-ink">
           Assign to a colleague
         </label>
         <div className="flex flex-wrap items-center gap-2">
-          <input
+          <select
             id={id}
-            name="assigneeId"
-            value={typed}
-            onChange={(event) => setTyped(event.target.value)}
-            aria-describedby={hintId}
-            // A native datalist rather than a listbox of our own. The browser
-            // gives keyboard navigation, filtering as you type, a mobile picker
-            // and screen-reader support for free — and, unlike a combobox, it
-            // leaves the field free text, which matters when the suggestions are
-            // a handful of ids seen in passing rather than a roster.
-            list={suggestionsId}
-            className="input"
-          />
-          <datalist id={suggestionsId}>
-            {known.map((one) => (
-              <option key={one.userId} value={one.userId} label={one.label} />
+            name="colleague"
+            value={picked}
+            onChange={(event) => setPicked(event.target.value)}
+            className="input min-w-0 flex-1"
+          >
+            <option value="" disabled>
+              Choose a colleague
+            </option>
+            {others.map((one) => (
+              <option key={one.userId} value={one.userId}>
+                {one.label}
+              </option>
             ))}
-          </datalist>
-          <button type="submit" disabled={writing || typed.trim() === ""} className="btn btn-quiet">
-            Assign
-          </button>
+            <option value={ANOTHER}>Someone else, by id</option>
+          </select>
+          {picked !== ANOTHER ? (
+            <button type="submit" disabled={writing || picked === ""} className="btn btn-quiet">
+              Assign
+            </button>
+          ) : null}
         </div>
-        <p id={hintId} className="text-xs leading-relaxed text-ink-muted">
-          The id of the User to make responsible.{" "}
-          {known.length > 0
-            ? "Suggestions are ids already seen on loaded tickets. This API has no directory, so anyone who has not appeared in them has to be typed in full."
-            : "This API has no directory to look one up in."}
-        </p>
+
+        {picked === ANOTHER ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <label htmlFor={`${id}-typed`} className="sr-only">
+              User id
+            </label>
+            <input
+              id={`${id}-typed`}
+              name="assigneeId"
+              value={typed}
+              onChange={(event) => setTyped(event.target.value)}
+              placeholder="User id"
+              className="input min-w-0 flex-1"
+            />
+            <button type="submit" disabled={writing || typed.trim() === ""} className="btn btn-quiet">
+              Assign
+            </button>
+          </div>
+        ) : null}
       </form>
     </fieldset>
   );

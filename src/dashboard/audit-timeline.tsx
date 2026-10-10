@@ -26,7 +26,7 @@ export function AuditTimeline({ ticketId }: { ticketId: string }) {
 
   return (
     <section className="space-y-3">
-      <h3 className="text-sm font-semibold tracking-tight">Activity</h3>
+      <h2 className="text-[0.9375rem] font-medium">Activity</h2>
 
       <CollectionView
         collection={audit}
@@ -71,7 +71,7 @@ function Entry({ entry }: { entry: AuditEntry }) {
           is worse than naming none. The id is what was recorded, and it is what
           is shown until there is somewhere to look it up.
         */}
-        {entry.actorId ? <span className="font-mono"> {entry.actorId}</span> : null} ·{" "}
+        {entry.actorId ? <code className="text-[0.8125rem]"> {entry.actorId}</code> : null} ·{" "}
         <time dateTime={entry.createdAt}>{timeAgo(entry.createdAt)}</time>
       </p>
     </li>

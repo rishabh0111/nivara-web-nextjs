@@ -39,7 +39,7 @@ export function TicketConversation({ ticket }: { ticket: Ticket }) {
 
   return (
     <section className="space-y-3">
-      <h3 className="text-sm font-semibold tracking-tight">Conversation</h3>
+      <h2 className="text-[0.9375rem] font-medium">Conversation</h2>
 
       {conversation.error ? (
         <p role="alert" className="text-sm text-danger">
@@ -48,7 +48,7 @@ export function TicketConversation({ ticket }: { ticket: Ticket }) {
         </p>
       ) : null}
 
-      <ul aria-label="Conversation" className="space-y-3">
+      <ul aria-label="Conversation" className="space-y-4">
         {chain.map((held) => (
           <Segment
             key={held.id}
@@ -171,7 +171,12 @@ function Row({ row }: { row: ChronologyRow }) {
       <When at={row.at} />
     </MessageRow>
   ) : (
-    <NoteRow author={STAFF_ACTOR_LABELS[row.note.authorKind]} at={row.at} body={row.note.body} />
+    <NoteRow
+      author={STAFF_ACTOR_LABELS[row.note.authorKind]}
+      handOver={row.note.authorKind === "service"}
+      at={row.at}
+      body={row.note.body}
+    />
   );
 }
 
@@ -186,18 +191,42 @@ function Row({ row }: { row: ChronologyRow }) {
  * reader hearing the page read aloud knows what they are listening to before
  * they have heard it.
  *
+ * Automation's note is the hand-over note, in the hand-over's own wash: it is
+ * what the model found and why it stopped, left for whoever picks this up. A
+ * colleague's aside is the dashed step off the sheet.
+ *
  * Colour is the one of the four that does the least work. It is the fastest to
  * read and the first to be unavailable, which is exactly the wrong order to
  * depend on it in.
  */
-function NoteRow({ author, at, body }: { author: string; at: string; body: string }) {
+function NoteRow({
+  author,
+  handOver,
+  at,
+  body,
+}: {
+  author: string;
+  /** Written by Automation: the note a hand-over leaves for the person who picks it up. */
+  handOver: boolean;
+  at: string;
+  body: string;
+}) {
   return (
-    <li className="ml-6 rounded-card border border-line border-l-4 border-l-note bg-note-wash p-3">
-      <p className="text-sm font-semibold text-note">Internal note: not visible to the customer</p>
-      <p className="text-sm leading-relaxed text-ink">
-        {author} <When at={at} />
+    <li className={`space-y-1 text-sm ${handOver ? "handover-note" : "staff-note"}`}>
+      <p className="font-medium text-ink">Internal note: not visible to the customer</p>
+      <p className="text-ink-muted">
+        {handOver ? "Left by Automation when it handed this over" : author} <When at={at} />
       </p>
-      <p className="whitespace-pre-wrap">{body}</p>
+      {handOver ? (
+        // The verdict and its figures are drawn beside the thread; the note as
+        // Automation wrote it is one press away rather than a wall of text.
+        <details className="pt-1">
+          <summary className="link w-fit text-sm">Automation&rsquo;s note</summary>
+          <p className="pt-2 leading-relaxed whitespace-pre-wrap text-ink">{body}</p>
+        </details>
+      ) : (
+        <p className="pt-1 leading-relaxed whitespace-pre-wrap text-ink">{body}</p>
+      )}
     </li>
   );
 }

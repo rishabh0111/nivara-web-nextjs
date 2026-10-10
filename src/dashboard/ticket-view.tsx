@@ -9,12 +9,12 @@ import { TICKET_STATE_LABELS } from "@/tickets/ticket";
 
 import { AuditTimeline } from "./audit-timeline";
 import { NoteForm } from "./note-form";
+import { RulingPanel, useTicketRuling } from "./ruling-panel";
 import { ReplyForm } from "./reply-form";
 import { TicketActions } from "./ticket-actions";
 import { TicketConversation } from "./ticket-conversation";
 import { useTicketConversation } from "./use-dashboard-ticket";
 import { useLiveTicket } from "./use-live-ticket";
-import { BackLink } from "@/ui/back-link";
 
 /**
  * One Ticket, understood, changed and answered.
@@ -49,6 +49,8 @@ export function TicketView({ ticket, onBack }: { ticket: Ticket; onBack: () => v
   // an earlier one in the chain is finished work, and nothing arrives on it.
   useLiveTicket(ticket.id);
 
+  const read = useTicketRuling(current);
+
   const headingId = useId();
   const region = useRef<HTMLElement>(null);
 
@@ -62,15 +64,27 @@ export function TicketView({ ticket, onBack }: { ticket: Ticket; onBack: () => v
   }, [ticket.id]);
 
   return (
-    <section ref={region} tabIndex={-1} aria-labelledby={headingId} className="space-y-6">
-      <BackLink onClick={onBack}>Back to tickets</BackLink>
-
+    <section ref={region} tabIndex={-1} aria-labelledby={headingId} className="scroll-mt-16 space-y-5 focus:outline-none">
       <div className="border-b border-line pb-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <h2 id={headingId} className="text-xl font-bold tracking-tight text-balance">
+        {/* Where this is: the queue, then this Ticket. The way back is the
+            first crumb, so it is named for what it does. */}
+        <nav aria-label="Breadcrumb" className="text-sm text-ink-muted">
+          <button type="button" onClick={onBack} className="link font-normal">
+            <span className="sr-only">Back to </span>Tickets
+          </button>
+          <span aria-hidden="true" className="px-1.5">
+            /
+          </span>
+        </nav>
+
+        <div className="mt-1 flex flex-wrap items-start gap-3">
+          <h1
+            id={headingId}
+            className="min-w-0 text-[1.75rem] leading-tight font-light tracking-[-0.02em] text-balance"
+          >
             {current.subject}
-          </h2>
-          <span className={`chip ${TICKET_STATE_CHIP[current.state]} shrink-0`}>
+          </h1>
+          <span className={`chip ${TICKET_STATE_CHIP[current.state]} mt-1 shrink-0`}>
             {TICKET_STATE_LABELS[current.state]}
           </span>
         </div>
@@ -79,6 +93,10 @@ export function TicketView({ ticket, onBack }: { ticket: Ticket; onBack: () => v
         <p className="mt-1.5 text-sm text-ink-muted">
           <TicketSummary ticket={current} showSource />
         </p>
+
+        {/* The verdict, in one line: what the AI did and, for a hand-over,
+            why. The panel beside the thread draws the same thing. */}
+        <p className="mt-3 min-h-5 text-[0.9375rem]">{read.verdict}</p>
       </div>
 
       {/* The conversation leads, because it is what a Ticket is: what the
@@ -86,8 +104,15 @@ export function TicketView({ ticket, onBack }: { ticket: Ticket; onBack: () => v
           On a wide screen the controls sit beside it rather than above it, so
           neither pushes the other off the first screen; on a phone they follow
           the thread. */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-        <div className="min-w-0 space-y-6">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-8 lg:gap-y-4">
+        {/* What the AI did and who has it: first in the markup, so on a phone
+            and a tablet it leads the thread rather than following it; on a
+            wide screen it heads the side column. */}
+        <div className="min-w-0 lg:col-start-2 lg:row-start-1">
+          <RulingPanel ticket={current} read={read} />
+        </div>
+
+        <div className="min-w-0 space-y-6 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <TicketConversation ticket={current} />
 
           {/* Both writes are against the Ticket the reader opened, never against an
@@ -101,7 +126,7 @@ export function TicketView({ ticket, onBack }: { ticket: Ticket; onBack: () => v
           <AuditTimeline ticketId={ticket.id} />
         </div>
 
-        <div className="min-w-0 lg:sticky lg:top-20">
+        <div className="min-w-0 lg:sticky lg:top-16 lg:col-start-2 lg:row-start-2">
           <TicketActions ticket={current} />
         </div>
       </div>

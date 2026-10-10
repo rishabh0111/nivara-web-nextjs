@@ -37,7 +37,6 @@ export function ReplyForm({ ticket }: { ticket: Ticket }) {
   return (
     <Compose
       label="Reply to the customer"
-      help="The customer will see this. For something only colleagues should read, use the internal note below instead."
       action="Send reply"
       acting="Sending…"
       announcement="What happened to your reply"

@@ -21,43 +21,45 @@ export function MessageRow({
   author,
   body,
   side,
+  customer = side === "theirs",
   children,
 }: {
   author: string;
   body: string;
   side: Side;
   /**
+   * Whether the customer wrote it. The customer's words are always the ink
+   * bubble and the desk's (a person or Automation) the pale one, on whichever
+   * side the reader sits — the same convention the product page uses. Defaults
+   * to the staff reading, where the other side is the customer.
+   */
+  customer?: boolean;
+  /**
    * When it was written, rendered by the caller.
-   *
-   * The instant is not taken as a prop and formatted here: each Surface words
-   * elapsed time its own way and owns its own `<time>` element, and a row that
-   * formatted it would be the second place that decides how a date reads.
    */
   children: React.ReactNode;
 }) {
   const mine = side === "mine";
 
   return (
-    <li
-      className={`card border-l-4 p-3.5 ${mine ? "border-l-accent bg-accent-wash/40" : "border-l-line-strong"}`}
-    >
-      <div className="flex items-center gap-2.5">
+    <li className={`flex flex-col gap-1.5 ${mine ? "items-end" : "items-start"}`}>
+      <div className={`flex items-center gap-2 text-[0.8125rem] ${mine ? "flex-row-reverse" : ""}`}>
         {/*
           An initial, not a photograph. There are no avatars on this API and
-          inventing one would be inventing a person — this is a coloured disc
-          that makes the two sides scannable down the left edge, and it is
-          hidden from a screen reader because the name is written out beside it.
+          inventing one would be inventing a person — this is a disc that makes
+          the two sides scannable, hidden from a screen reader because the name
+          is written out beside it.
         */}
         <span
           aria-hidden="true"
-          className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-            mine ? "bg-accent text-accent-ink" : "bg-sunken text-ink-muted ring-1 ring-line-strong"
+          className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
+            customer ? "bg-ink text-sheet" : "bg-raised text-ink"
           }`}
         >
           {author.slice(0, 1).toUpperCase()}
         </span>
 
-        <p className="min-w-0 flex-1 text-sm font-semibold tracking-tight text-ink">{author}</p>
+        <p className="font-medium text-ink">{author}</p>
 
         {children}
       </div>
@@ -65,7 +67,13 @@ export function MessageRow({
       {/* Plain text, stored verbatim. Markup in it is what someone typed, not
           markup. `break-words` so one unbroken 200-character string is a
           wrapped paragraph rather than a horizontal scrollbar on the page. */}
-      <p className="mt-2 leading-relaxed whitespace-pre-wrap break-words">{body}</p>
+      <p
+        className={`bubble ${customer ? "bubble-them" : "bubble-us"} !m-0 leading-relaxed whitespace-pre-wrap break-words ${
+          mine ? "rounded-br-[4px] rounded-bl-[14px]" : "rounded-bl-[4px] rounded-br-[14px]"
+        }`}
+      >
+        {body}
+      </p>
     </li>
   );
 }

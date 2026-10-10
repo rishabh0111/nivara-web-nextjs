@@ -64,7 +64,7 @@ export function TicketView({
 
       <div className="border-b border-line pb-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <h2 id={headingId} className="text-xl font-bold tracking-tight text-balance">
+          <h2 id={headingId} className="text-[1.375rem] leading-snug font-normal tracking-[-0.01em] text-balance">
             {ticket.subject}
           </h2>
           <span className={`chip ${TICKET_STATE_CHIP[ticket.state]} shrink-0`}>
@@ -200,6 +200,7 @@ function MessageRow({ message }: { message: Message }) {
       // A Contact reading their own Portal: what they wrote is theirs, and
       // everything else on the thread came from the other side of the desk.
       side={message.authorKind === "contact" ? "mine" : "theirs"}
+      customer={message.authorKind === "contact"}
     >
       <time dateTime={message.createdAt} className="text-sm text-ink-muted">
         {timeAgo(message.createdAt)}

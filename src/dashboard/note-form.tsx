@@ -20,7 +20,7 @@ const ADDED = "Your internal note was added. The customer cannot see it.";
  * The box is tinted and edged the same way a Note row in the conversation is,
  * which is the one piece of styling this form does not leave to the shared
  * control. It is the same distinction doing the same work in the same colours:
- * a reader who has learnt that amber means "the customer cannot see this" should
+ * a reader who has learnt that a dashed step means "the customer cannot see this" should
  * meet it while typing, not only afterwards.
  */
 export function NoteForm({ ticketId }: { ticketId: string }) {
@@ -28,15 +28,14 @@ export function NoteForm({ ticketId }: { ticketId: string }) {
 
   return (
     <Compose
-      label="Internal note"
-      // What it is, and where to go instead. The reply form is directly above,
-      // so the one mistake this pair exists to prevent is a note typed into the
-      // wrong box — and each box names the other.
-      help="Only colleagues on this tenant will see this. It is never delivered to the customer and never appears in the ticket thread above. To answer the customer, use the reply above."
+      // The label carries who reads it, and the dashed step carries it again:
+      // the one mistake this pair exists to prevent is a note typed into the
+      // wrong box, and that is said where the eye already is.
+      label="Internal note, for colleagues only"
       action="Add internal note"
       acting="Adding…"
       announcement="What happened to your note"
-      classes={{ box: "input border-l-4 border-l-note bg-note-wash" }}
+      classes={{ box: "input resize-y border-dashed bg-sunken leading-relaxed", action: "btn btn-quiet" }}
       onSubmit={async (noted) => {
         const written = await writes.writeNote(noted);
         return written.ok
