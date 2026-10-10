@@ -59,7 +59,17 @@ function Permitted() {
       <DashboardNav current="analytics" principal={principal} />
 
       <main className="mx-auto w-full max-w-6xl space-y-8 px-4 pt-6 pb-24 sm:px-6 sm:pb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
+        {/* What the screen answers, before the figures do. "Deflection" is the
+            trade's word, and a first-time reader should not have to know it. */}
+        <div className="space-y-1.5">
+          <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
+          <p className="max-w-[75ch] text-sm leading-relaxed text-ink-muted">
+            How the desk did on the tickets created in the window below: how many ended with no
+            agent touching them (deflection, which credits the AI and self-service), how many were
+            resolved, how often a response or resolution target was missed, and how long those
+            took.
+          </p>
+        </div>
 
         {isPending ? (
           <p role="status" className="text-sm text-ink-muted">

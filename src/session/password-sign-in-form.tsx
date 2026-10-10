@@ -116,7 +116,7 @@ export function PasswordSignInForm({
             </svg>
           </span>
 
-          <h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Sign in to Nivara Desk</h1>
           <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">{standing}</p>
         </div>
 

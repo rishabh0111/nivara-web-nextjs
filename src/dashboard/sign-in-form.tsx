@@ -23,7 +23,7 @@ export function SignInForm() {
     <PasswordSignInForm
       workspaceHint="Which workspace to sign in to. It is not needed again afterwards."
       refused={REFUSED}
-      standing="Work tickets, reply to customers, and keep things moving."
+      standing="The staff side of a customer-support helpdesk. Work tickets, reply to customers, and keep things moving."
       demo={DEMO_STAFF}
       signIn={session.signIn}
     />

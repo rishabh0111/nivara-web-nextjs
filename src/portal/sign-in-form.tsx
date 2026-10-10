@@ -22,7 +22,7 @@ export function SignInForm() {
     <PasswordSignInForm
       workspaceHint="Which workspace's portal to sign in to."
       refused={REFUSED}
-      standing="Raise a ticket and read the replies."
+      standing="The customer side of a support helpdesk. Raise a ticket and read the replies."
       demo={DEMO_CONTACT}
       signIn={session.signIn}
     />

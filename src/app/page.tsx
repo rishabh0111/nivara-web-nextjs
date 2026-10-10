@@ -63,9 +63,26 @@ export default function HomePage() {
           Nivara Desk
         </h1>
 
-        <p className="mt-5 text-lg leading-relaxed text-pretty text-ink-muted">
-          Four front ends and one client. All four run against the same API and are told apart by
-          which credential they hold — not by which pages they render.
+        <p className="mt-5 text-lg leading-relaxed text-pretty text-ink">
+          A multitenant customer-support helpdesk with an AI layer. Customers ask from a portal, a
+          widget on the company&rsquo;s own site, or Slack; the AI answers what the help centre
+          covers and hands the rest to an agent&rsquo;s queue.
+        </p>
+
+        <p className="mt-3 text-base leading-relaxed text-pretty text-ink-muted">
+          These are its four front ends and one client. All four run against the same API and are
+          told apart by which credential they hold — not by which pages they render.
+        </p>
+
+        <p className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+          {/* The one thing most visitors came for, before the four doors below:
+              the agent's queue, already signed in as the seeded admin. */}
+          <a href="/dashboard?demo" className="btn btn-primary">
+            Open the live demo
+          </a>
+          <span className="text-sm text-ink-muted">
+            Signed in as the demo admin of Meridian, a demo company. Nothing to create.
+          </span>
         </p>
       </header>
 
