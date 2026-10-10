@@ -40,6 +40,9 @@ export type DashboardTicket = {
   thread(ticketId: string, cursor?: string): Promise<ApiResult<Page<Message>>>;
   /** One page of the internal Notes, oldest first. */
   notes(ticketId: string, cursor?: string): Promise<ApiResult<Page<Note>>>;
+  /** The newest few of each, newest first: enough to read the AI's ruling from. */
+  latestMessages(ticketId: string, limit: number): Promise<ApiResult<Page<Message>>>;
+  latestNotes(ticketId: string, limit: number): Promise<ApiResult<Page<Note>>>;
   /** One page of the audit timeline, newest first. */
   audit(ticketId: string, cursor?: string): Promise<ApiResult<Page<AuditEntry>>>;
   /** Writes an internal Note. Never reaches the Contact, by table rather than by flag. */
@@ -82,6 +85,20 @@ export function createDashboardTicket(session: SessionClient): DashboardTicket {
     // Both halves of the conversation are asked for oldest first, and for the
     // same reason: they are merged by `createdAt`, and two collections paged
     // from opposite ends would never line up at a boundary at all.
+    latestMessages(ticketId, limit) {
+      return session.page("/tickets/{id}/messages", "get", {
+        params: { id: ticketId },
+        query: { sort: "-createdAt", limit },
+      });
+    },
+
+    latestNotes(ticketId, limit) {
+      return session.page("/tickets/{id}/notes", "get", {
+        params: { id: ticketId },
+        query: { sort: "-createdAt", limit },
+      });
+    },
+
     thread(ticketId, cursor) {
       return session.page("/tickets/{id}/messages", "get", {
         params: { id: ticketId },
