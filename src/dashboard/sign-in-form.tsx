@@ -1,5 +1,6 @@
 "use client";
 
+import { DEMO_STAFF } from "@/session/demo-credentials";
 import { PasswordSignInForm } from "@/session/password-sign-in-form";
 
 import { useDashboardSession } from "./dashboard-session-context";
@@ -23,6 +24,7 @@ export function SignInForm() {
       workspaceHint="Which workspace to sign in to. It is not needed again afterwards."
       refused={REFUSED}
       standing="Work tickets, reply to customers, and keep things moving."
+      demo={DEMO_STAFF}
       signIn={session.signIn}
     />
   );

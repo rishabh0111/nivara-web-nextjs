@@ -10,16 +10,18 @@
  * refusal: one message for every reason, so the form cannot be used to learn
  * which accounts exist.
  */
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import type { ApiResult } from "@/api/client";
 import type { PasswordCredentials } from "@/session/credentials";
+import { demoRequested, type DemoAccount } from "@/session/demo-credentials";
 import { Field } from "@/ui/field";
 
 export function PasswordSignInForm({
   workspaceHint,
   refused,
   standing,
+  demo,
   signIn,
 }: {
   /** What the workspace field means on this Surface. */
@@ -35,6 +37,13 @@ export function PasswordSignInForm({
    * Dashboard should find that out before they try their password on it.
    */
   standing: string;
+  /**
+   * The seeded account this Surface offers to sign in as, in one press.
+   *
+   * Someone evaluating the product should not need the README open beside the
+   * form. A refusal of the demo account gets the same one message as any other.
+   */
+  demo?: DemoAccount;
   signIn: (credentials: PasswordCredentials) => Promise<ApiResult<unknown>>;
 }) {
   const formId = useId();
@@ -42,24 +51,45 @@ export function PasswordSignInForm({
   const [submitting, setSubmitting] = useState(false);
   const [problem, setProblem] = useState<string | undefined>();
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const fields = new FormData(event.currentTarget);
-
+  async function attempt(credentials: PasswordCredentials) {
     setSubmitting(true);
     setProblem(undefined);
 
-    // The tenant is read off the form and handed straight to the lookup. It is
-    // not kept here, so there is nothing to clear and nothing to send again.
-    const outcome = await signIn({
-      tenantId: String(fields.get("tenantId") ?? ""),
-      email: String(fields.get("email") ?? ""),
-      password: String(fields.get("password") ?? ""),
-    });
+    const outcome = await signIn(credentials);
 
     setSubmitting(false);
     if (!outcome.ok) setProblem(refused);
   }
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const fields = new FormData(event.currentTarget);
+
+    // The tenant is read off the form and handed straight to the lookup. It is
+    // not kept here, so there is nothing to clear and nothing to send again.
+    await attempt({
+      tenantId: String(fields.get("tenantId") ?? ""),
+      email: String(fields.get("email") ?? ""),
+      password: String(fields.get("password") ?? ""),
+    });
+  }
+
+  // Opened from a "live demo" link: sign in as the demo account without a
+  // press. Once per mount — a strict-mode double effect would otherwise sign in
+  // twice — and the flag comes out of the address bar first, so signing out
+  // lands on the form rather than straight back in.
+  const demoTaken = useRef(false);
+  useEffect(() => {
+    if (!demo || demoTaken.current || !demoRequested(window.location.search)) return;
+    demoTaken.current = true;
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("demo");
+    window.history.replaceState(window.history.state, "", url);
+
+    void attempt(demo.credentials);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
+  }, [demo]);
 
   return (
     // Centred in the viewport rather than sitting at the top of a page that is
@@ -89,6 +119,28 @@ export function PasswordSignInForm({
           <h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
           <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">{standing}</p>
         </div>
+
+        {demo ? (
+          <div className="mb-4 space-y-3">
+            <button
+              type="button"
+              disabled={submitting}
+              onClick={() => void attempt(demo.credentials)}
+              className="btn btn-primary w-full"
+            >
+              {submitting ? "Signing in…" : `Sign in as ${demo.who}`}
+            </button>
+            <p className="text-center text-xs leading-relaxed text-ink-muted">
+              Seeded demo data. Nothing to create, nothing to pay for.
+            </p>
+            <p
+              aria-hidden="true"
+              className="flex items-center gap-3 text-xs text-ink-faint before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line"
+            >
+              or with your own details
+            </p>
+          </div>
+        ) : null}
 
         <form
           onSubmit={onSubmit}
@@ -127,7 +179,11 @@ export function PasswordSignInForm({
             </p>
           ) : null}
 
-          <button type="submit" disabled={submitting} className="btn btn-primary w-full">
+          <button
+            type="submit"
+            disabled={submitting}
+            className={demo ? "btn btn-quiet w-full" : "btn btn-primary w-full"}
+          >
             {submitting ? "Signing in…" : "Sign in"}
           </button>
         </form>

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+import { DEMO_STAFF } from "@/session/demo-credentials";
 import { SessionStore } from "@/session/store";
 
 import { baseUrl, dashboardApi, principal, renderDashboard, ticket } from "./dashboard.fixtures";
@@ -36,7 +37,7 @@ async function signIn(password = "hunter2") {
   await user.type(await screen.findByLabelText(/workspace id/i), "ten_1");
   await user.type(screen.getByLabelText(/email/i), "sam@meridian.test");
   await user.type(screen.getByLabelText(/password/i), password);
-  await user.click(screen.getByRole("button", { name: /sign in/i }));
+  await user.click(screen.getByRole("button", { name: /^sign in$/i }));
   return user;
 }
 
@@ -140,7 +141,7 @@ describe("a User signing in", () => {
     await signIn("wrong");
 
     expect(await screen.findByRole("alert")).toBeVisible();
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /^sign in$/i })).toBeEnabled();
   });
 
   it("is operable by keyboard alone", async () => {
@@ -149,6 +150,9 @@ describe("a User signing in", () => {
 
     renderDashboard(store);
 
+    // The demo account is offered first, then the form for everyone else.
+    await user.tab();
+    expect(screen.getByRole("button", { name: /^sign in as/i })).toHaveFocus();
     await user.tab();
     expect(screen.getByLabelText(/workspace id/i)).toHaveFocus();
     await user.keyboard("ten_1");
@@ -160,6 +164,64 @@ describe("a User signing in", () => {
     await user.keyboard("hunter2{Enter}");
 
     expect(await screen.findByRole("list", { name: /^tickets$/i })).toBeVisible();
+  });
+});
+
+describe("the demo account", () => {
+  afterEach(() => window.history.replaceState(null, "", "/"));
+
+  it("signs in as the seeded admin in one press", async () => {
+    let body: unknown;
+    server.use(
+      http.post(`${baseUrl}/auth/sign-in`, async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json(minted);
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderDashboard(store);
+    await user.click(await screen.findByRole("button", { name: /sign in as the demo admin/i }));
+
+    expect(await screen.findByRole("list", { name: /^tickets$/i })).toBeVisible();
+    expect(body).toEqual(DEMO_STAFF.credentials);
+  });
+
+  it("signs in without a press when the page was opened with ?demo, and drops the flag", async () => {
+    server.use(http.post(`${baseUrl}/auth/sign-in`, () => HttpResponse.json(minted)));
+    window.history.replaceState(null, "", "/dashboard?demo&status=open");
+
+    renderDashboard(store);
+
+    expect(await screen.findByRole("list", { name: /^tickets$/i })).toBeVisible();
+    expect(window.location.search).toBe("?status=open");
+  });
+
+  it("never shows the tenant it signs in to, nor puts it in the address bar", async () => {
+    server.use(http.post(`${baseUrl}/auth/sign-in`, () => HttpResponse.json(minted)));
+    window.history.replaceState(null, "", "/dashboard?demo");
+
+    renderDashboard(store);
+    await screen.findByRole("list", { name: /^tickets$/i });
+
+    expect(document.body.textContent).not.toContain(DEMO_STAFF.credentials.tenantId);
+    expect(window.location.href).not.toContain(DEMO_STAFF.credentials.tenantId);
+  });
+
+  it("gets the same one refusal as any other account", async () => {
+    server.use(
+      http.post(`${baseUrl}/auth/sign-in`, () =>
+        HttpResponse.json({ error: { code: "unauthenticated", message: "no" } }, { status: 401 }),
+      ),
+    );
+
+    const user = userEvent.setup();
+    renderDashboard(store);
+    await user.click(await screen.findByRole("button", { name: /sign in as the demo admin/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Those details did not match an account in that workspace.",
+    );
   });
 });
 

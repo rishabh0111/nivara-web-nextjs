@@ -6,7 +6,7 @@
 ![Tailwind%20CSS](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white)
 
-[Live](https://nivara-web-nextjs.vercel.app)  ·
+[Live demo, signed in](https://nivara-web-nextjs.vercel.app/dashboard?demo)  ·
 [Widget demo](https://rishabh0111.github.io/nivara-web-nextjs/)  ·
 [The product](https://nivara-landing-iota.vercel.app)
 
@@ -18,7 +18,8 @@ What separates the four is which credential they hold, not which pages they rend
 multitenant and this application is *implicitly* tenant-scoped: the tenant is resolved server-side
 from the token on every request and is never a value the client holds, passes, or puts in a URL.
 
-**[Live](https://nivara-web-nextjs.vercel.app)** · demo sign-in is seeded, see below.
+**[Open the live demo](https://nivara-web-nextjs.vercel.app/dashboard?demo)**, already signed in as the
+seeded admin. Nothing to copy.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/ticket.dark.png">
@@ -53,7 +54,13 @@ set `NEXT_PUBLIC_API_URL=http://localhost:3000`.
 
 ## The demo sign-in
 
-Sign-in takes the tenant id as a required field, so all three values are needed:
+The Dashboard and the Portal each offer a **Sign in as the demo …** button, and opening either with
+`?demo` signs in without a press:
+[`/dashboard?demo`](https://nivara-web-nextjs.vercel.app/dashboard?demo) as Meridian's admin,
+[`/portal?demo`](https://nivara-web-nextjs.vercel.app/portal?demo) as Jules, a Meridian Contact.
+The flag names no tenant and comes out of the address bar once read.
+
+To sign in by hand, the form takes the tenant id as a required field, so all three values are needed:
 
 | | |
 |---|---|
@@ -61,7 +68,8 @@ Sign-in takes the tenant id as a required field, so all three values are needed:
 | Email | `admin@meridian.test` |
 | Password | `nivara-demo-password` |
 
-They are seeded demo data, printed by the API's `npm run db:seed`, and public by construction.
+Jules signs in to the Portal as `jules@example.test` with the same password. They are seeded demo
+data, printed by the API's `npm run db:seed`, and public by construction.
 
 ## The four surfaces
 

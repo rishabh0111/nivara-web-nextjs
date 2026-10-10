@@ -362,7 +362,7 @@ describe("who the screen is offered to", () => {
     server.use(asAdmin, reporting([]));
     renderAnalytics(new SessionStore());
 
-    expect(await screen.findByRole("button", { name: /sign in/i })).toBeVisible();
+    expect(await screen.findByRole("button", { name: /^sign in$/i })).toBeVisible();
   });
 });
 

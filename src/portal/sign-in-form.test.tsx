@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import { createApiClient } from "@/api/client";
 import { QueryProvider } from "@/api/query-client";
+import { DEMO_CONTACT } from "@/session/demo-credentials";
 import { SessionStore } from "@/session/store";
 
 import { createPortalSession } from "./portal-session";
@@ -59,7 +60,7 @@ async function signIn(password = "hunter2") {
   await user.type(await screen.findByLabelText(/workspace id/i), "ten_1");
   await user.type(screen.getByLabelText(/email/i), "jules@example.test");
   await user.type(screen.getByLabelText(/password/i), password);
-  await user.click(screen.getByRole("button", { name: /sign in/i }));
+  await user.click(screen.getByRole("button", { name: /^sign in$/i }));
 }
 
 describe("the Portal sign-in form", () => {
@@ -131,7 +132,7 @@ describe("the Portal sign-in form", () => {
     await signIn("wrong");
 
     expect(await screen.findByRole("alert")).toBeVisible();
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /^sign in$/i })).toBeEnabled();
   });
 
   it("is operable by keyboard alone", async () => {
@@ -146,6 +147,9 @@ describe("the Portal sign-in form", () => {
 
     await screen.findByLabelText(/workspace id/i);
 
+    // The demo account is offered first, then the form for everyone else.
+    await user.tab();
+    expect(screen.getByRole("button", { name: /^sign in as/i })).toHaveFocus();
     await user.tab();
     expect(screen.getByLabelText(/workspace id/i)).toHaveFocus();
     await user.keyboard("ten_1");
@@ -157,6 +161,25 @@ describe("the Portal sign-in form", () => {
     await user.keyboard("hunter2{Enter}");
 
     expect(await screen.findByRole("heading", { name: /your tickets/i })).toBeVisible();
+  });
+});
+
+describe("the demo account", () => {
+  it("signs in as the seeded Contact in one press", async () => {
+    let body: unknown;
+    server.use(
+      http.post(`${baseUrl}/portal/auth/sign-in`, async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json({ accessToken: "tok_1", expiresInSeconds: 900 });
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderPortal();
+    await user.click(await screen.findByRole("button", { name: /sign in as a demo customer/i }));
+
+    expect(await screen.findByRole("heading", { name: /your tickets/i })).toBeVisible();
+    expect(body).toEqual(DEMO_CONTACT.credentials);
   });
 });
 

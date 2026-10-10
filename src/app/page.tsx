@@ -7,11 +7,14 @@ import { ThemeToggle } from "@/ui/theme";
  * `held` is the whole point of the page: what separates these is not what they
  * render but which credential they carry, and a reader who leaves with only
  * that has the architecture.
+ *
+ * The three password Surfaces carry `?demo`, so a card opens the Surface signed
+ * in as its seeded account rather than on a form asking for one.
  */
 const surfaces = [
   {
     name: "Portal",
-    href: "/portal",
+    href: "/portal?demo",
     held: "A Contact, signed in with a password",
     does: "Raise a ticket, read the replies, answer them.",
     icon: (
@@ -20,7 +23,7 @@ const surfaces = [
   },
   {
     name: "Dashboard",
-    href: "/dashboard",
+    href: "/dashboard?demo",
     held: "A User with the agent or admin role",
     does: "Work tickets, reply, leave notes, move things along.",
     icon: <path d="M3 3v18h18M7 15l4-4 3 3 5-6" />,
@@ -34,7 +37,7 @@ const surfaces = [
   },
   {
     name: "Analytics",
-    href: "/dashboard/analytics",
+    href: "/dashboard/analytics?demo",
     held: "A User holding analytics:read",
     does: "Four rates, two percentiles, and what an empty cohort is not.",
     icon: <path d="M3 3v18h18M7 16v-5M12 16V8M17 16v-8" />,

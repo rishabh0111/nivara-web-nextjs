@@ -1,5 +1,6 @@
 "use client";
 
+import { DEMO_CONTACT } from "@/session/demo-credentials";
 import { PasswordSignInForm } from "@/session/password-sign-in-form";
 
 import { usePortalSession } from "./portal-session-context";
@@ -22,6 +23,7 @@ export function SignInForm() {
       workspaceHint="Which workspace's portal to sign in to."
       refused={REFUSED}
       standing="Raise a ticket and read the replies."
+      demo={DEMO_CONTACT}
       signIn={session.signIn}
     />
   );
