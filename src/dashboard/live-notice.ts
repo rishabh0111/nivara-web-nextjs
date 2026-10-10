@@ -42,13 +42,40 @@ const TIMER_LABELS: Record<SlaBreach["timer"], string> = {
 };
 
 /**
+ * Looks a Ticket's subject up in whatever has already been read.
+ *
+ * Supplied by the caller rather than fetched here: a notice is worded the
+ * moment it lands, and it is never worth a request to word it better.
+ */
+export type SubjectOf = (ticketId: string) => string | undefined;
+
+/** How long a Ticket id is shown where no subject is known: enough to tell two apart. */
+const SHORT_ID = 8;
+
+/**
+ * Which Ticket, in words a User recognises.
+ *
+ * The subject where it has been read — it is what the queue lists them by —
+ * and the start of the id where it has not, which is how a reader matches it
+ * against a Ticket they open. A whole UUID in a sentence is a wall nobody reads.
+ */
+export function nameTicket(ticketId: string, subjectOf?: SubjectOf): string {
+  const subject = subjectOf?.(ticketId)?.trim();
+
+  return subject ? `“${subject}”` : `ticket ${ticketId.slice(0, SHORT_ID)}`;
+}
+
+/**
  * What this envelope is worth telling a User about, if anything.
  *
  * Every event the contract defines is named, including the five that are
  * announced by nothing — an event added to the contract and not decided about
  * here is a compile error rather than one that silently reports nothing.
  */
-export function noticeFor(envelope: RealtimeEnvelope): LiveNotice | undefined {
+export function noticeFor(
+  envelope: RealtimeEnvelope,
+  subjectOf?: SubjectOf,
+): LiveNotice | undefined {
   switch (envelope.event) {
     case "ticket.sla.breached": {
       const { ticketId, timer, breachedAt } = envelope.data;
@@ -59,7 +86,7 @@ export function noticeFor(envelope: RealtimeEnvelope): LiveNotice | undefined {
         // that noticed it.
         id: `sla:${ticketId}:${timer}:${breachedAt}`,
         at: breachedAt,
-        what: `SLA breached on ticket ${ticketId}: the ${TIMER_LABELS[timer]} timer ran out.`,
+        what: `SLA breached on ${nameTicket(ticketId, subjectOf)}: the ${TIMER_LABELS[timer]} timer ran out.`,
       };
     }
 
@@ -73,7 +100,7 @@ export function noticeFor(envelope: RealtimeEnvelope): LiveNotice | undefined {
         id: `integration:${messageId}:${source}:${target}`,
         at: envelope.ts,
         what:
-          `A reply on ticket ${ticketId} was never delivered. ` +
+          `A reply on ${nameTicket(ticketId, subjectOf)} was never delivered. ` +
           `${source} gave up trying to reach ${target}. It said: ${error}`,
       };
     }

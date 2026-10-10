@@ -13,6 +13,7 @@
  * the live region for a place where things are added in a meaningful order and
  * old ones fall away, which is exactly what this is.
  */
+import { useQueryClient, type InfiniteData, type QueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
@@ -24,10 +25,13 @@ import {
   useState,
 } from "react";
 
+import type { Page } from "@/api/client";
 import type { RealtimeEnvelope } from "@/realtime/envelope";
+import type { Ticket } from "@/tickets/ticket";
 import { timeAgo } from "@/tickets/time-ago";
 
-import { noticeFor, type LiveNotice } from "./live-notice";
+import { dashboardKeys } from "./dashboard-keys";
+import { noticeFor, type LiveNotice, type SubjectOf } from "./live-notice";
 
 /**
  * How many are kept.
@@ -105,10 +109,35 @@ export function useLiveNotices(): NoticeBoard {
  */
 export function useAnnouncing(): (envelope: RealtimeEnvelope) => void {
   const { raise } = useLiveNotices();
+  const cache = useQueryClient();
 
   return (envelope) => {
-    const notice = noticeFor(envelope);
+    const notice = noticeFor(envelope, subjectsIn(cache));
     if (notice) raise(notice);
+  };
+}
+
+/**
+ * A Ticket's subject, from whatever this Surface has already read: any slice
+ * of the queue, or the conversation of a Ticket that has been opened.
+ *
+ * Read from the cache and never fetched — wording a notice is not worth a
+ * request, and a Ticket nobody has loaded is named by its short id instead.
+ */
+function subjectsIn(cache: QueryClient): SubjectOf {
+  return (ticketId) => {
+    for (const [, data] of cache.getQueriesData<InfiniteData<Page<Ticket>>>({
+      queryKey: dashboardKeys.queue,
+    })) {
+      for (const page of data?.pages ?? []) {
+        const held = page.items.find((one) => one.id === ticketId);
+        if (held) return held.subject;
+      }
+    }
+
+    return cache
+      .getQueryData<Ticket[]>(dashboardKeys.conversation(ticketId))
+      ?.find((one) => one.id === ticketId)?.subject;
   };
 }
 

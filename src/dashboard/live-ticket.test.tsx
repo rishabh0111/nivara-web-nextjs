@@ -223,7 +223,8 @@ describe("something that happened without changing the Ticket", () => {
 
     const notices = await screen.findByRole("log", { name: /what has happened/i });
     await waitFor(() => expect(notices).toHaveTextContent(/first response/i));
-    expect(notices).toHaveTextContent("tkt_1");
+    // Named by the subject the reader already has on screen, not by its id.
+    expect(notices).toHaveTextContent("“The printer is on fire”");
   });
 
   it("shows the breach in the log too, because the API records one", async () => {
