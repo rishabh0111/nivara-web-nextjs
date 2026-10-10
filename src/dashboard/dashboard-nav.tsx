@@ -15,10 +15,12 @@
  */
 import Link from "next/link";
 
+import { Wordmark } from "@/ui/logo";
 import { ThemeToggle } from "@/ui/theme";
 
 import { NoticeBell } from "./live-notices";
 import { useIsMobileViewport } from "@/ui/viewport";
+import { isDemoStaff } from "./demo-orientation";
 import { canReadAnalytics, STAFF_ROLE_LABELS, type StaffPrincipal } from "./staff-principal";
 import { useSignOut } from "./use-sign-out";
 
@@ -61,39 +63,28 @@ export function DashboardNav({
       {/* Sticky, because the queue is longer than the window and a reader who
           has scrolled to the bottom of it should not have to come back up to
           leave. */}
-      <header className="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-3 sm:gap-x-6 sm:px-6">
+      <header className="sticky top-0 z-40 bg-frame">
+        <div className="flex h-12 w-full items-center gap-2 px-4 sm:gap-x-8 sm:px-6">
           {/*
           The mark is not a link. The only place it could go is the screen the
           reader is already on, and a logo that navigates nowhere is a tab stop
           that costs a keyboard reader a press to discover it does nothing.
+
+          The name is kept on screen at every width, unlike the labels further
+          along this bar: it is the one word that says which product this is.
+          On the demo account the workspace follows it, because "Meridian" is
+          who the visitor is working for and nothing else on screen says so.
         */}
-          <p className="flex shrink-0 items-center gap-2.5">
-            <span
-              aria-hidden="true"
-              className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-ink"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-4"
-              >
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
-              </svg>
-            </span>
-            {/*
-            Kept on screen at every width, unlike the labels further along this
-            bar. Those are icons a reader already recognises once they have used
-            them; this is the one word that says which product they are in, and
-            it is the first thing a screenshot or a shoulder-surfing colleague
-            reads. `sr-only` is still used elsewhere in this bar for exactly the
-            labels that *can* fall back to an icon.
-          */}
-            <span className="truncate text-sm font-bold tracking-tight">Nivara Desk</span>
+          <p className="flex min-w-0 shrink-0 items-center gap-2 text-sm">
+            <Wordmark />
+            {isDemoStaff(principal) ? (
+              <span className="hidden text-ink-muted md:inline">
+                <span aria-hidden="true" className="px-1.5 text-line-strong">
+                  /
+                </span>
+                Meridian
+              </span>
+            ) : null}
           </p>
 
           {/*
@@ -110,7 +101,7 @@ export function DashboardNav({
             screen reader reading two "Analytics" links off its rotor.
           */}
           {!narrow ? (
-            <nav aria-label="Dashboard" className="hidden items-center gap-1 sm:flex">
+            <nav aria-label="Dashboard" className="hidden h-full items-stretch gap-5 sm:flex">
               {SCREENS.map((entry) => {
                 // Analytics is offered on the role and refused by the API. Absent
                 // rather than disabled for an agent: an affordance that is there but
@@ -137,8 +128,10 @@ export function DashboardNav({
                   </>
                 );
 
+                // The active tab is a 2px ink underline and nothing else: the
+                // frame stays grey, and the colour on this screen is the work's.
                 const shape =
-                  "flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold sm:px-3";
+                  "flex items-center gap-2 border-b-2 pt-0.5 text-sm font-medium transition-colors duration-150";
 
                 // The current screen is text, not a link. It is marked `aria-current`
                 // for a reader who cannot see which one is lit, and it is deliberately
@@ -148,7 +141,7 @@ export function DashboardNav({
                   <span
                     key={entry.screen}
                     aria-current="page"
-                    className={`${shape} bg-accent-wash text-accent`}
+                    className={`${shape} border-ink text-ink`}
                   >
                     {inner}
                   </span>
@@ -156,7 +149,7 @@ export function DashboardNav({
                   <Link
                     key={entry.screen}
                     href={entry.href}
-                    className={`${shape} text-ink-muted transition-colors duration-150 hover:bg-sunken hover:text-ink`}
+                    className={`${shape} border-transparent text-ink-muted hover:text-ink`}
                   >
                     {inner}
                   </Link>
@@ -165,7 +158,7 @@ export function DashboardNav({
             </nav>
           ) : null}
 
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
             {/*
             Before the identity and the way out, because it is the only control
             on this bar that is about the tenant's work rather than about the
@@ -176,15 +169,15 @@ export function DashboardNav({
             <NoticeBell />
 
             {principal ? (
-              <p className="flex items-center gap-2.5">
+              <p className="flex items-center gap-2 pl-1 sm:pr-2">
                 <span
                   aria-hidden="true"
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sunken text-xs font-bold text-ink-muted ring-1 ring-line-strong"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-raised text-xs font-medium text-ink"
                 >
                   {principal.name.slice(0, 1).toUpperCase()}
                 </span>
                 <span className="hidden leading-tight sm:block">
-                  <span className="block text-sm font-semibold tracking-tight">
+                  <span className="block text-[0.8125rem] font-medium">
                     {principal.name}
                   </span>
                   <span className="block text-xs text-ink-muted">
@@ -202,7 +195,7 @@ export function DashboardNav({
             <button
               type="button"
               onClick={() => void signOut()}
-              className="btn btn-quiet !min-h-0 px-3 py-1.5 text-sm"
+              className="btn btn-frame !min-h-9 px-2.5"
             >
               <svg
                 aria-hidden="true"
@@ -265,7 +258,7 @@ function DashboardBottomNav({
   return (
     <nav
       aria-label="Dashboard"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-frame"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="flex">
@@ -294,21 +287,21 @@ function DashboardBottomNav({
               {/* Labelled in full here, unlike the icon-only condensed header —
                   a tab bar with unlabelled icons is a guessing game, and there
                   is no shortage of width in a column this narrow. */}
-              <span className="text-[11px] font-semibold">{entry.label}</span>
+              <span className="text-xs font-medium">{entry.label}</span>
             </>
           );
 
           const shape = "flex flex-1 flex-col items-center justify-center gap-1 py-2.5";
 
           return here ? (
-            <span key={entry.screen} aria-current="page" className={`${shape} text-accent`}>
+            <span key={entry.screen} aria-current="page" className={`${shape} text-ink`}>
               {inner}
             </span>
           ) : (
             <Link
               key={entry.screen}
               href={entry.href}
-              className={`${shape} text-ink-muted transition-colors duration-150 active:bg-sunken`}
+              className={`${shape} text-ink-muted transition-colors duration-150 active:bg-sheet-step`}
             >
               {inner}
             </Link>

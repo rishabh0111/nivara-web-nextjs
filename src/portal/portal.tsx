@@ -6,6 +6,7 @@ import type { Ticket } from "@/tickets/ticket";
 
 import { NewTicketForm } from "./new-ticket-form";
 import { PortalChainProvider } from "./portal-chain";
+import { Wordmark } from "@/ui/logo";
 import { ThemeToggle } from "@/ui/theme";
 
 import { usePortalSession, usePortalSignedIn } from "./portal-session-context";
@@ -58,32 +59,16 @@ function SignedIn() {
           nowhere for it to go but here, and a logo that navigates nowhere is a
           tab stop that costs a keyboard reader a press to find that out.
         */}
-        <header className="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur-md">
-          <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-            <p className="flex items-center gap-2.5">
-              <span
-                aria-hidden="true"
-                className="flex size-8 items-center justify-center rounded-lg bg-accent text-accent-ink"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-4"
-                >
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
-                </svg>
-              </span>
-              <span className="truncate text-sm font-bold tracking-tight">Nivara Desk</span>
+        <header className="sticky top-0 z-40 bg-frame">
+          <div className="flex h-12 w-full items-center gap-2 px-4 sm:px-6">
+            <p className="min-w-0 text-sm">
+              <Wordmark />
             </p>
 
             <button
               type="button"
               onClick={() => void session.signOut()}
-              className="btn btn-quiet !min-h-0 px-3 py-1.5 text-sm"
+              className="btn btn-frame ml-auto !min-h-9 px-2.5"
             >
               <svg
                 aria-hidden="true"
@@ -104,8 +89,9 @@ function SignedIn() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-2xl space-y-6 px-4 py-6 sm:px-6">
-          <h1 className="text-2xl font-bold tracking-tight">Your tickets</h1>
+        <main className="sheet">
+          <div className="mx-auto w-full max-w-2xl space-y-6 px-4 py-6 sm:px-6">
+          <h1 className="text-[1.75rem] leading-tight font-light tracking-[-0.02em]">Your tickets</h1>
 
           {reading.view === "ticket" ? (
             <TicketView
@@ -126,6 +112,7 @@ function SignedIn() {
               returningFrom={reading.closed}
             />
           )}
+          </div>
         </main>
       </>
     </PortalChainProvider>

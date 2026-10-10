@@ -85,8 +85,19 @@ function SignedIn() {
     <>
       <DashboardNav current="queue" principal={principal} />
 
-      <main className="mx-auto w-full max-w-6xl space-y-5 px-4 pt-6 pb-24 sm:px-6 sm:pb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Tickets</h1>
+      {/* The sheet: the work, inset from the frame the bar above sits on. */}
+      <main className="sheet">
+        <div className="mx-auto w-full max-w-[76rem] space-y-5 px-4 pt-5 pb-24 sm:px-6 sm:pt-6 sm:pb-8">
+        {/* For the visitor who pressed "live demo": who they are, in one line,
+            above everything. On the queue only — inside a Ticket they have
+            already done the first thing it suggests. */}
+        {reading.view === "queue" ? <DemoOrientation principal={principal} /> : null}
+
+        {/* The queue's title. Inside a Ticket the subject is the title, with
+            "Tickets" as the crumb above it. */}
+        {reading.view === "queue" ? (
+          <h1 className="text-[1.75rem] leading-tight font-light tracking-[-0.02em]">Tickets</h1>
+        ) : null}
 
         {/* Above everything it is about. What has stopped is not the queue or the
           Ticket but the connection both of them are being kept current by, and
@@ -94,10 +105,6 @@ function SignedIn() {
           anything under it. */}
         <LiveSilence live={session.live} />
 
-        {/* For the visitor who pressed "live demo": who they are, what this
-            list is, and what to do first. On the queue only — inside a Ticket
-            they have already done the first thing it suggests. */}
-        {reading.view === "queue" ? <DemoOrientation principal={principal} /> : null}
 
         {/*
         The queue, immediately. There is no landing page to navigate away from —
@@ -116,6 +123,7 @@ function SignedIn() {
             returningFrom={reading.closed}
           />
         )}
+        </div>
       </main>
     </>
   );
