@@ -8,9 +8,9 @@
 
 [Live demo, signed in](https://nivara-web-nextjs.vercel.app/dashboard?demo)  ·
 [Widget demo](https://rishabh0111.github.io/nivara-web-nextjs/)  ·
-[The product](https://nivara-landing-iota.vercel.app)
+[The product](https://nivara-desk.vercel.app)
 
-The four front ends of [Nivara Desk](https://nivara-landing-iota.vercel.app) — the customer
+The four front ends of [Nivara Desk](https://nivara-desk.vercel.app) — the customer
 **Portal**, the agent **Dashboard**, the embeddable **Widget**, and **Analytics** — and one typed
 client shared between them. Next.js 15, React 19, TypeScript, Tailwind v4.
 
