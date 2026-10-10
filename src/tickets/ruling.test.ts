@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { gateSignals, handOverReason, rulingOf, verdictOf } from "./ruling";
+import { gateSignals, handOverReason, readsAsQuestion, rulingOf, verdictOf } from "./ruling";
 import { message, note } from "./tickets.fixtures";
 
 const question = message({
@@ -84,6 +84,20 @@ describe("reading the AI's ruling off what Automation wrote", () => {
 
   it("has no ruling where Automation never wrote", () => {
     expect(rulingOf("open", [question], [note()])).toBeUndefined();
+  });
+});
+
+describe("whether one reply is worded as Automation's question", () => {
+  it("reads a single sentence ending in a question mark as a question", () => {
+    expect(readsAsQuestion("Which part isn't working: signing in, or the importer? ")).toBe(true);
+  });
+
+  it("reads an answer that closes on a courtesy question as an answer", () => {
+    expect(readsAsQuestion("Use the import screen. Does that help?")).toBe(false);
+  });
+
+  it("reads a statement as an answer", () => {
+    expect(readsAsQuestion("The importer expects email, name and company.")).toBe(false);
   });
 });
 

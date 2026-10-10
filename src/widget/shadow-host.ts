@@ -5,7 +5,10 @@
  * Widget's whole appearance inside. Nothing else is added to that document —
  * no stylesheet in its head, no class on its body, no global name — because
  * every one of those is a thing a Tenant's own site could collide with, and the
- * collision would show up on their site rather than in our tests.
+ * collision would show up on their site rather than in our tests. The one
+ * exception is the Widget's own face, registered with the document's font set
+ * under a prefixed family name once a Visitor asks for support, because a font
+ * declared inside a shadow root is not honoured everywhere (`widget-face.ts`).
  *
  * An iframe would isolate more, and is refused: a frame served from this
  * application's origin presents *this* origin on every request, so the Tenant

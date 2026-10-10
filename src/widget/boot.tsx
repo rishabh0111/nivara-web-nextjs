@@ -16,6 +16,7 @@ import { QueryProvider } from "@/api/query-client";
 
 import { mountWidgetHost, type WidgetHost } from "./shadow-host";
 import { resumeWidget, type WidgetMemory } from "./widget-memory";
+import { widgetFace } from "./widget-face";
 import { keepWidgetSessionFresh } from "./widget-renewal";
 import { readWidgetConfig } from "./widget-config";
 import { createWidgetSession, type WidgetSession } from "./widget-session";
@@ -52,13 +53,19 @@ export function bootWidget({
   // with the panel closed still has a conversation to come back to.
   const stopRenewing = keepWidgetSessionFresh(held);
 
+  // The face is fetched once somebody has asked for support. A session taken
+  // up from an earlier page is somebody who already did; everybody else asks
+  // by pressing the Launcher, which is where the Widget calls this again.
+  const face = widgetFace(script);
+  if (held.current()) face.wanted();
+
   const root: Root = createRoot(host.container);
   root.render(
     // The Widget's own cache, in its own tree. It is the same store the other
     // Surfaces use — one cursor-paginated read of a collection, not a second
     // hand-rolled one written because this bundle is small.
     <QueryProvider>
-      <Widget session={held} resumed={resumed} />
+      <Widget session={held} resumed={resumed} face={face} />
     </QueryProvider>,
   );
 

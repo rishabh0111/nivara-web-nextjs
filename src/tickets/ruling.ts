@@ -80,13 +80,24 @@ export function rulingOf(
 }
 
 function isQuestion(reply: Written, last: Written | undefined, state: TicketState): boolean {
-  const body = reply.body.trim();
+  return last === reply && WAITING.includes(state) && readsAsQuestion(reply.body);
+}
+
+/**
+ * Whether one reply from Automation is worded as its one clarifying question:
+ * a single sentence ending in a question mark.
+ *
+ * The wording half of the rule above, without the Ticket's standing. A Ticket's
+ * ruling also asks whether the question is still waiting; a reply in a thread
+ * is a question or an answer whatever came after it, which is how the Widget
+ * marks each of Automation's turns.
+ */
+export function readsAsQuestion(body: string): boolean {
+  const said = body.trim();
   return (
-    last === reply &&
-    WAITING.includes(state) &&
-    body.endsWith("?") &&
+    said.endsWith("?") &&
     // One sentence: nothing ends before the closing question mark.
-    !/[.!?](\s|$)/.test(body.slice(0, -1))
+    !/[.!?](\s|$)/.test(said.slice(0, -1))
   );
 }
 

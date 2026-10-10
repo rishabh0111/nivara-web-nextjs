@@ -37,7 +37,13 @@ export type TurnState =
   | { at: "streaming"; text: string }
   | { at: "clarify"; question: string }
   | { at: "escalated"; message: string }
-  | { at: "done" }
+  /**
+   * Over. `ruling` is what the stream showed it to be — an Answer typed in, or
+   * the one clarifying question — so the reply that lands from the API can be
+   * marked with the call that produced it rather than with a reading of its
+   * wording. Absent when the stream said neither.
+   */
+  | { at: "done"; ruling?: "answer" | "clarify" }
   | { at: "error"; message: string };
 
 export type AiTurn = {
@@ -108,7 +114,15 @@ export function useAiTurn(session: WidgetSession): AiTurn {
           // else is ever coming for that outcome, so clearing it here would
           // erase the only notice the Visitor gets.
           if (!stillCurrent()) return;
-          setState((was) => (was.at === "escalated" || was.at === "error" ? was : { at: "done" }));
+          setState((was) =>
+            was.at === "escalated" || was.at === "error"
+              ? was
+              : {
+                  at: "done",
+                  ruling:
+                    was.at === "clarify" ? "clarify" : was.at === "streaming" ? "answer" : undefined,
+                },
+          );
         },
         onError: (_code, message) => {
           if (stillCurrent()) setState({ at: "error", message });

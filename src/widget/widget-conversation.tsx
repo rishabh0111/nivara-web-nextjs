@@ -5,14 +5,16 @@ import { describeFailure } from "@/api/errors";
 import { describeError, unwrap } from "@/api/query";
 import { CUSTOMER_AUTHOR_LABELS } from "@/tickets/customer-author";
 import type { Message } from "@/tickets/message";
+import { readsAsQuestion, type Ruling } from "@/tickets/ruling";
 import { TICKET_STATE_LABELS } from "@/tickets/ticket";
 import { timeAgo } from "@/tickets/time-ago";
 
-import type { AiTurn } from "./use-ai-turn";
+import type { AiTurn, TurnState } from "./use-ai-turn";
 import { useWidgetThread } from "./use-widget-tickets";
 import { useWidgetWrites } from "./use-widget-writes";
 import { WidgetCompose } from "./widget-compose";
 import { widgetKeys } from "./widget-keys";
+import { TurnRuling } from "./widget-ruling";
 import { WidgetTurnNotice } from "./widget-turn-notice";
 import type { WidgetTickets } from "./widget-tickets";
 
@@ -57,7 +59,11 @@ export function Conversation({
   return (
     <div className="nvw-stack">
       {conversation.data ? (
-        <p className="nvw-standing">{TICKET_STATE_LABELS[conversation.data.state]}</p>
+        <p className="nvw-standing">
+          <span className="nvw-chip" data-state={conversation.data.state}>
+            {TICKET_STATE_LABELS[conversation.data.state]}
+          </span>
+        </p>
       ) : conversation.error ? (
         // Said here rather than left for the composer to refuse on submit. The
         // Visitor must not type a paragraph into a box that was never going to
@@ -82,7 +88,7 @@ export function Conversation({
           {describeError(thread.error)}
         </p>
       ) : (
-        <Thread said={said} />
+        <Thread said={said} turn={aiTurn.stateFor(ticketId)} />
       )}
 
       <WidgetCompose
@@ -122,33 +128,43 @@ export function Conversation({
         }}
       />
 
-      {/* This Conversation's Turn only — including one started from `Start`
-          just before it navigated here, which is the ordinary way a Visitor's
-          first message is answered. */}
-      <WidgetTurnNotice state={aiTurn.stateFor(ticketId)} />
     </div>
   );
 }
 
 /**
- * What has been said, oldest at the top.
+ * What has been said, oldest at the top, and Automation's turn below it.
  *
  * A log rather than a plain list: a Visitor using a screen reader is told about
  * a reply arriving without having to go looking for it, which is what makes
  * this read as a conversation rather than as a page that has to be re-read.
+ *
+ * Every reply from Automation carries the ruling it was, so the Visitor sees
+ * whether they were answered or asked something without being told. The
+ * latest one takes the call its own Turn streamed, when this page saw it run;
+ * any other is read from its wording, by the same rule the Dashboard uses.
  */
-function Thread({ said }: { said: Message[] }) {
+function Thread({ said, turn }: { said: Message[]; turn: TurnState }) {
   const bottom = useRef<HTMLDivElement>(null);
 
   // The newest message is the one worth seeing, so the scroll starts at the
-  // bottom and returns there as the conversation grows. Earlier messages are
-  // asked for deliberately, above.
+  // bottom and returns there as the conversation grows or the Turn moves on.
+  // Earlier messages are asked for deliberately, above.
   useEffect(() => {
     // Called only where the browser has it. This is a nicety on top of a
     // conversation that is already correct, and it runs inside somebody else's
     // page — the one place a missing method must not become their error.
     bottom.current?.scrollIntoView?.({ block: "end" });
-  }, [said.length]);
+  }, [said.length, turn.at]);
+
+  let latestFromAutomation: Message | undefined;
+  for (const message of said) if (message.authorKind === "service") latestFromAutomation = message;
+  const streamed = turn.at === "done" ? turn.ruling : undefined;
+
+  function rulingOf(message: Message): Ruling {
+    if (message === latestFromAutomation && streamed) return streamed;
+    return readsAsQuestion(message.body) ? "clarify" : "answer";
+  }
 
   return (
     <div className="nvw-thread">
@@ -161,21 +177,31 @@ function Thread({ said }: { said: Message[] }) {
         and this one is inserted the instant a conversation opens.
       */}
       <ul aria-label="Conversation" className="nvw-said" role="log" aria-live="polite">
-        {said.map((message) => (
-          <li
-            key={message.id}
-            className={message.authorKind === "contact" ? "nvw-mine" : "nvw-theirs"}
-          >
-            <p className="nvw-who">
-              {CUSTOMER_AUTHOR_LABELS[message.authorKind]}{" "}
-              <time dateTime={message.createdAt}>{timeAgo(message.createdAt)}</time>
-            </p>
-            {/* Plain text, stored verbatim. Markup in it is what somebody
-                typed, not markup. */}
-            <p className="nvw-body-text">{message.body}</p>
-          </li>
-        ))}
+        {said.map((message) => {
+          const mine = message.authorKind === "contact";
+          return (
+            <li key={message.id} className={mine ? "nvw-said-mine" : "nvw-said-theirs"}>
+              <div className={mine ? "nvw-mine" : "nvw-theirs"} data-author={message.authorKind}>
+                <p className="nvw-who">
+                  {CUSTOMER_AUTHOR_LABELS[message.authorKind]}{" "}
+                  <time dateTime={message.createdAt}>{timeAgo(message.createdAt)}</time>
+                </p>
+                {/* Plain text, stored verbatim. Markup in it is what somebody
+                    typed, not markup. */}
+                <p className="nvw-body-text">{message.body}</p>
+              </div>
+              {message.authorKind === "service" ? (
+                <TurnRuling call={{ ruling: rulingOf(message) }} />
+              ) : null}
+            </li>
+          );
+        })}
       </ul>
+
+      {/* This Conversation's Turn only — including one started from `Start`
+          just before it navigated here, which is the ordinary way a Visitor's
+          first message is answered. */}
+      <WidgetTurnNotice state={turn} />
       <div ref={bottom} />
     </div>
   );

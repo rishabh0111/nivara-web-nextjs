@@ -345,6 +345,42 @@ describe("a Visitor who has been here before", () => {
     expect(said[1]).toContain("Support");
   });
 
+  /**
+   * Automation's turns carry the ruling they were, drawn; a person's reply
+   * carries none, because nothing was ruled.
+   */
+  it("sees which of the three each of Automation's turns was", async () => {
+    server.use(
+      mints(),
+      http.get(`${baseUrl}/widget/tickets`, () => conversations(earlier)),
+      http.get(`${baseUrl}/widget/tickets/tkt_1`, () => HttpResponse.json(earlier)),
+      http.get(`${baseUrl}/widget/tickets/tkt_1/messages`, () =>
+        HttpResponse.json({
+          data: [
+            message({ id: "msg_4", authorKind: "user", body: "Thanks, sorted." }),
+            message({ id: "msg_3", authorKind: "service", body: "It ships tomorrow from the depot." }),
+            message({ id: "msg_2", authorKind: "service", body: "Which order do you mean?" }),
+            message({ id: "msg_1", authorKind: "contact", body: "Where is my order?" }),
+          ],
+          nextCursor: null,
+        }),
+      ),
+    );
+
+    const widget = boot();
+    await open(widget);
+    await press(button(widget, ".nvw-row"));
+    await settle();
+
+    const lit = all(widget, "[aria-label='Conversation'] li").map(
+      (row) => row.querySelector("[data-lit]")?.getAttribute("data-lit") ?? null,
+    );
+    expect(lit).toEqual([null, "clarify", "answer", null]);
+    expect(inside(widget, "[aria-label='Conversation']")?.textContent).toContain(
+      "Automation asked a question.",
+    );
+  });
+
   it("replies to one of them", async () => {
     let replied: unknown;
     server.use(
@@ -743,5 +779,7 @@ describe("what nivara-ai says about a Visitor's first message", () => {
     // Visitor is ever told. Before the Turn was held above both screens, it
     // was discarded with the box they typed into and nothing rendered here.
     expect(inside(widget, ".nvw-system-notice")?.textContent).toMatch(/person/i);
+    // And drawn: the strip above it has Hand over lit.
+    expect(inside(widget, ".nvw-turn [data-lit]")?.getAttribute("data-lit")).toBe("escalate");
   });
 });

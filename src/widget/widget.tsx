@@ -10,7 +10,9 @@ import { useLiveConversation } from "./use-live-conversation";
 import { useWidgetApi } from "./use-widget-tickets";
 import { Conversation } from "./widget-conversation";
 import { Conversations, Start } from "./widget-conversations";
+import type { WidgetFace } from "./widget-face";
 import type { ResumedWidget } from "./widget-memory";
+import { BackIcon, Bubble, CloseIcon, Mark } from "./widget-ruling";
 import { readWidgetFailure, type WidgetSession } from "./widget-session";
 
 /**
@@ -55,7 +57,16 @@ type Phase =
  */
 type Where = { at: "conversations" } | { at: "starting" } | { at: "reading"; ticketId: string };
 
-export function Widget({ session, resumed }: { session: WidgetSession; resumed: ResumedWidget }) {
+export function Widget({
+  session,
+  resumed,
+  face,
+}: {
+  session: WidgetSession;
+  resumed: ResumedWidget;
+  /** Work Sans, fetched once the Visitor asks for support. See `widget-face.ts`. */
+  face?: WidgetFace;
+}) {
   // Both read once, from what the last page left. A Visitor who navigated with
   // the Widget open and a conversation on screen lands here with the same thing
   // on screen, which is the whole of "it survives navigation".
@@ -143,6 +154,7 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
 
   async function open() {
     moved.current = "opened";
+    face?.wanted();
 
     if (session.current()) {
       setPhase({ at: "open" });
@@ -209,11 +221,12 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
           {/* Kept whatever is on screen. The heading is the panel's structure
               for anyone navigating by headings, and swapping it for a back
               control would take that away exactly where it is most useful. */}
-          <h2 className="nvw-title">Support</h2>
+          <h2 className="nvw-title">
+            <Mark />
+            Support
+          </h2>
 
-          <button type="button" className="nvw-close" onClick={close}>
-            Close
-          </button>
+          <CloseButton onClose={close} />
         </div>
 
         {where.at === "conversations" ? null : (
@@ -222,6 +235,7 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
             className="nvw-back"
             onClick={() => setWhere({ at: "conversations" })}
           >
+            <BackIcon />
             Your conversations
           </button>
         )}
@@ -258,11 +272,12 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
     return (
       <section className="nvw-panel" aria-label="Support">
         <div className="nvw-header">
-          <h2 className="nvw-title">Support</h2>
+          <h2 className="nvw-title">
+            <Mark />
+            Support
+          </h2>
 
-          <button type="button" className="nvw-close" onClick={close}>
-            Close
-          </button>
+          <CloseButton onClose={close} />
         </div>
 
         <div className="nvw-body">
@@ -293,7 +308,10 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
     return (
       <section className="nvw-panel" aria-label="Support">
         <div className="nvw-header">
-          <h2 className="nvw-title">Support</h2>
+          <h2 className="nvw-title">
+            <Mark />
+            Support
+          </h2>
         </div>
         <div className="nvw-body">
           <p className="nvw-refusal" role="alert">
@@ -318,6 +336,7 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
         disabled={opening}
         onClick={() => void open()}
       >
+        <Bubble />
         {opening ? "Connecting…" : "Chat with support"}
       </button>
 
@@ -325,7 +344,7 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
         // Named rather than spun on, exactly as on every other Surface. The API
         // sleeps when idle and the first request after that takes tens of
         // seconds; a Launcher that only said "Connecting…" would read as broken.
-        <p className="nvw-quiet" role="status" aria-live="polite">
+        <p className="nvw-quiet nvw-note" role="status" aria-live="polite">
           {coldStart === "acknowledged"
             ? "Still connecting…"
             : "Support is waking up. This can take up to a minute."}
@@ -333,10 +352,20 @@ export function Widget({ session, resumed }: { session: WidgetSession; resumed: 
       ) : null}
 
       {phase.at === "launcher" && phase.trouble ? (
-        <p className="nvw-refusal" role="alert">
+        <p className="nvw-refusal nvw-note" role="alert">
           {phase.trouble}
         </p>
       ) : null}
     </>
+  );
+}
+
+/** An icon, and its word for anyone who cannot see the icon. */
+function CloseButton({ onClose }: { onClose: () => void }) {
+  return (
+    <button type="button" className="nvw-close" onClick={onClose}>
+      <CloseIcon />
+      <span className="nvw-only-spoken">Close</span>
+    </button>
   );
 }

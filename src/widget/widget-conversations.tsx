@@ -12,6 +12,8 @@ import type { AiTurn } from "./use-ai-turn";
 import { useWidgetConversations } from "./use-widget-tickets";
 import { useWidgetWrites } from "./use-widget-writes";
 import { WidgetCompose } from "./widget-compose";
+import { NextIcon } from "./widget-ruling";
+import { RULING_LABELS, RULINGS } from "@/tickets/ruling";
 import type { WidgetTickets } from "./widget-tickets";
 
 const OPENED_NOT_SAID =
@@ -74,10 +76,13 @@ export function Conversations({
               name — the subject and everything needed to tell two of them apart.
             */}
             <button type="button" className="nvw-row" onClick={() => onRead(conversation.id)}>
-              <span className="nvw-row-subject">{conversation.subject}</span>
-              <span className="nvw-row-note">
-                <Standing conversation={conversation} />
+              <span className="nvw-row-text">
+                <span className="nvw-row-subject">{conversation.subject}</span>
+                <span className="nvw-row-note">
+                  <Standing conversation={conversation} />
+                </span>
               </span>
+              <NextIcon />
             </button>
           </li>
         ))}
@@ -119,9 +124,26 @@ export function Start({
 
   return (
     <div className="nvw-stack">
-      <p className="nvw-greeting">Hi! What can we help with?</p>
+      <div className="nvw-start">
+        <p className="nvw-greeting">Hi! What can we help with?</p>
 
-      {disclosure ? <p className="nvw-quiet nvw-body-text">{disclosure}</p> : null}
+        {/* What can happen to the question, shown before it is asked: the
+            strip every one of Automation's turns will light. */}
+        <div className="nvw-endings">
+          <span className="nvw-ruling" aria-hidden="true" data-legend="">
+            {RULINGS.map((one) => (
+              <span key={one} data-hue={one}>
+                {RULING_LABELS[one]}
+              </span>
+            ))}
+          </span>
+          <p className="nvw-quiet nvw-small">
+            Every question ends one of three ways: answered, asked about, or handed to a person.
+          </p>
+        </div>
+
+        {disclosure ? <p className="nvw-quiet nvw-small nvw-body-text">{disclosure}</p> : null}
+      </div>
 
       <WidgetCompose
         label="Your message"
@@ -186,7 +208,10 @@ function useDisclosure(): string | undefined {
 function Standing({ conversation }: { conversation: Ticket }) {
   return (
     <>
-      {TICKET_STATE_LABELS[conversation.state]} · last reply{" "}
+      <span className="nvw-chip" data-state={conversation.state}>
+        {TICKET_STATE_LABELS[conversation.state]}
+      </span>{" "}
+      Last reply{" "}
       {/* The instant, machine-readable, beside the reading of it — "3 hours
           ago" is only true for as long as the page has been open. */}
       <time dateTime={conversation.updatedAt}>{timeAgo(conversation.updatedAt)}</time>
