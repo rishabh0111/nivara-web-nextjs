@@ -21,13 +21,13 @@ from the token on every request and is never a value the client holds, passes, o
 **[Open the live demo](https://nivara-web-nextjs.vercel.app/dashboard?demo)**, already signed in as the
 seeded admin. Nothing to copy.
 
-![A visitor asks the widget two questions; one is answered, one is handed to a person, and both appear as tickets on the agent dashboard.](docs/img/walkthrough.gif)
+![The agent queue with each ticket's AI ruling, a handed-over ticket opened beside its ruling, then the widget: a visitor's question answered with Answer lit, and a second handed to a person.](docs/img/walkthrough.gif)
 
-<sub>45 seconds, recorded by Playwright against the live deployment: a question the help centre covers is answered, a refund question is handed to a person, and both show up as tickets on the agent queue.</sub>
+<sub>24 seconds, recorded by Playwright (`nivara-landing/scripts/capture.ts`). The queue and the ticket are read from the live demo; the widget runs on a local build and is answered from the recorded turns for these two questions, so recording it opens no ticket on the live demo.</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/ticket.dark.png">
-  <img src="docs/img/ticket.light.png" alt="The agent dashboard with a resolved ticket open: the customer's question, the answer posted by Automation, and the state, priority and assignee controls.">
+  <img src="docs/img/ticket.light.png" alt="The agent dashboard with a handed-over ticket open: the customer's refund question, the internal note Automation left, the ruling with Hand over lit and the reason model_declined, and the state, priority and assignee controls.">
 </picture>
 
 ## Running it
@@ -95,7 +95,7 @@ on a deliberately hostile page served from a different origin:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/widget.panel.dark.png">
-  <img src="docs/img/widget.panel.light.png" width="330" alt="The widget open on a host page, showing a question and the answer beneath it, marked resolved.">
+  <img src="docs/img/widget.panel.light.png" width="330" alt="The widget open on a host page: a question, the answer from Automation, and the ruling beneath it with Answer lit. The conversation is marked resolved.">
 </picture>
 
 ## Generated types
