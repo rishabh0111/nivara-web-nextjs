@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { Work_Sans } from "next/font/google";
 
 import { ColdStartNotice } from "@/cold-start/cold-start-notice";
 import { themeScript } from "@/ui/theme";
@@ -13,13 +13,12 @@ import "./globals.css";
  * class. `display: swap` because a support desk that shows nothing for 300ms is
  * a support desk that looks down.
  */
-const jakarta = Plus_Jakarta_Sans({
+const work = Work_Sans({
   subsets: ["latin"],
+  weight: ["300", "400", "500"],
   display: "swap",
-  variable: "--font-jakarta",
+  variable: "--font-work",
 });
-
-const mono = JetBrains_Mono({ subsets: ["latin"], display: "swap", variable: "--font-mono-face" });
 
 /**
  * Where a relative URL in the metadata below is resolved from.
@@ -66,14 +65,14 @@ export const metadata: Metadata = {
  */
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f7f9" },
-    { media: "(prefers-color-scheme: dark)", color: "#0c1017" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f5f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#1c1d20" },
   ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={work.variable} suppressHydrationWarning>
       <head>
         {/*
           Blocking, and before anything paints. The server cannot know which
@@ -84,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-dvh bg-canvas font-sans text-ink antialiased">
+      <body className="min-h-dvh bg-frame font-sans text-ink antialiased">
         {children}
         <ColdStartNotice />
       </body>

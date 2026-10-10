@@ -251,7 +251,7 @@ export function NoticeBell() {
             ? "What has happened. Nothing to report."
             : `What has happened. ${count === 1 ? "1 notice" : `${count} notices`}.`
         }
-        className="btn btn-quiet relative !min-h-0 px-2 py-1.5 disabled:opacity-40"
+        className="btn btn-frame relative !min-h-9 px-2 disabled:opacity-40"
       >
         <svg
           key={rung}
@@ -270,7 +270,7 @@ export function NoticeBell() {
         {count > 0 ? (
           <span
             aria-hidden="true"
-            className="animate-pop absolute -top-1.5 -right-1.5 flex min-w-4 items-center justify-center rounded-full bg-urgent px-1 text-[10px] leading-4 font-bold text-white"
+            className="animate-pop absolute -top-1.5 -right-1.5 flex min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[11px] leading-4 font-medium text-sheet"
           >
             {count > 9 ? "9+" : count}
           </span>

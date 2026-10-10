@@ -36,33 +36,10 @@ export function CollectionView<Item>({
         items.length === 0 ? (
           <div
             role="status"
-            className="animate-rise flex flex-col items-center gap-3 rounded-card border border-dashed border-line-strong bg-sunken px-4 py-10 text-center"
+            className="animate-rise rounded-card border border-dashed border-line-strong px-4 py-6 text-center"
           >
-            {/*
-              Decorative, and marked as such — the sentence beneath it is the
-              whole message. An empty list is the one screen with room for a
-              picture, and a bare line of grey text in a dashed box reads as
-              something that failed rather than something that is simply
-              finished.
-            */}
-            <span
-              aria-hidden="true"
-              className="flex size-11 items-center justify-center rounded-full bg-surface text-ink-faint ring-1 ring-line"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-5"
-              >
-                <path d="M3 7h18M3 12h18M3 17h9" />
-              </svg>
-            </span>
 
-            <p className="max-w-sm text-sm leading-relaxed text-ink-muted">{empty}</p>
+            <p className="mx-auto max-w-[60ch] text-sm leading-relaxed text-ink-muted">{empty}</p>
           </div>
         ) : (
           children(items)
@@ -183,7 +160,7 @@ export function LoadMore({
           {collection.isLoadingMore ? (
             <span
               aria-hidden="true"
-              className="size-4 animate-spin rounded-full border-2 border-line-strong border-t-accent"
+              className="size-4 animate-spin rounded-full border-2 border-line-strong border-t-ink"
             />
           ) : (
             <svg

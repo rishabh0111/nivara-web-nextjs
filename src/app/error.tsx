@@ -51,7 +51,7 @@ export default function Error({
           </svg>
         </span>
 
-        <h1 className="text-2xl font-bold tracking-tight">This screen stopped working</h1>
+        <h1 className="text-[1.75rem] leading-tight font-light tracking-[-0.02em]">This screen stopped working</h1>
 
         <p className="mt-3 text-sm leading-relaxed text-ink-muted">
           Something went wrong rendering this page. Nothing you did caused it and nothing you had

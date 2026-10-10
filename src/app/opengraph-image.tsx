@@ -35,8 +35,8 @@ export default function OpengraphImage() {
         flexDirection: "column",
         justifyContent: "center",
         padding: 80,
-        background: "#0c1017",
-        color: "#e7ebf1",
+        background: "#18191b",
+        color: "#eff0f1",
         fontFamily: "sans-serif",
       }}
     >
@@ -48,10 +48,10 @@ export default function OpengraphImage() {
             width: 56,
             height: 56,
             borderRadius: 14,
-            background: "#1d63c4",
+            background: "#ff4a1f",
           }}
         />
-        <div style={{ display: "flex", marginLeft: 20, fontSize: 30, color: "#9aa6b6" }}>
+        <div style={{ display: "flex", marginLeft: 20, fontSize: 30, color: "#a3a5aa" }}>
           Nivara Desk
         </div>
       </div>
@@ -62,7 +62,7 @@ export default function OpengraphImage() {
           flexDirection: "column",
           marginTop: 44,
           fontSize: 76,
-          fontWeight: 700,
+          fontWeight: 300,
           letterSpacing: "-0.03em",
         }}
       >
@@ -71,7 +71,7 @@ export default function OpengraphImage() {
       </div>
 
       <div
-        style={{ display: "flex", marginTop: 28, fontSize: 30, color: "#9aa6b6", maxWidth: 920 }}
+        style={{ display: "flex", marginTop: 28, fontSize: 30, color: "#a3a5aa", maxWidth: 920 }}
       >
         A support desk — portal, dashboard, widget and analytics — told apart by which credential
         each one holds.
@@ -86,10 +86,10 @@ export default function OpengraphImage() {
               marginRight: 12,
               padding: "10px 22px",
               borderRadius: 999,
-              border: "1px solid #232c39",
-              background: "#141a23",
+              border: "1px solid #383b40",
+              background: "#222427",
               fontSize: 24,
-              color: "#9aa6b6",
+              color: "#a3a5aa",
             }}
           >
             {tag}

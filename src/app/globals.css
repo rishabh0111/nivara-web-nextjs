@@ -1,226 +1,153 @@
 @import "tailwindcss";
 
 /*
- * The palette, and why it is anchored where it is.
+ * Nivara Desk: graphite, one safety orange, Work Sans.
  *
- * The four chart series colours below came first, and they were validated as a
- * set — the lightness band, the chroma floor, and the separation between each
- * adjacent pair under colour-vision deficiency. Rather than choose a brand
- * palette beside them and end up with two unrelated blues on one screen, the
- * brand is anchored *on* them: the identity blue is the series-1 family and the
- * urgency orange is the series-2 family. A KPI tile and the line it summarises
- * are then the same colour because they are the same thing, not by coincidence.
+ * The values are the product page's (`nivara-landing/DESIGN.md`), so the app a
+ * visitor lands in from the page is visibly the product the page showed them.
+ * Only the composition differs: this is a working screen, built as a tinted
+ * frame holding a white sheet.
  *
- * Orange is spent only on elapsed time — a queue going stale, an answer nobody
- * has given, a window that closed. It is never decoration. On a desk where the
- * only real question is how long somebody has been waiting, an accent that
- * appears on a heading teaches a reader to stop seeing it on the one row that
- * matters.
+ * The orange is spent on two things and nothing else: the one primary action
+ * on a screen, and the hand-over — the one outcome of an AI turn that asks a
+ * person to act. Answered is green and asked is amber, and those three hues
+ * are the ruling (`.ruling`), the element every screen here is built around.
+ *
+ * The older token names (`canvas`, `surface`, `sunken`, `line`, `calm`,
+ * `urgent`) are kept as aliases onto the system's roles, so a utility written
+ * against them reads the same role it always did.
  */
 
 :root {
   color-scheme: light;
 
-  /* Ground. Slightly warm paper against cool ink, so the surfaces read as
-     stacked rather than as one flat sheet with lines drawn on it. */
-  --canvas: #f6f7f9;
-  --surface: #ffffff;
-  --surface-sunken: #f1f3f6;
-  --border: #e3e7ed;
-  --border-strong: #cbd3de;
+  /* The system's roles. */
+  --ground: #eff0f1;
+  --frame: #f4f5f6;
+  --sheet: #ffffff;
+  --sheet-step: #eceef0;
+  --raised: #d5d8db;
+  --edge: #d9dbde;
+  --control-edge: #b9bdc2;
+  --ink: #18191b;
+  --muted: #55585e;
+  /* The quietest text that still carries words: placeholders, meta. 5.4:1 on the sheet. */
+  --faint: #65686e;
+
+  --accent: #ff4a1f;
+  --accent-strong: #e8380f;
+  --accent-ink: #18191b;
+  --accent-text: #c2300c;
+
+  /* The three rulings. Hand over is the accent: the one outcome that asks a person to act. */
+  --go: #17804f;
+  --go-wash: #dcf1e6;
+  --ask: #8a6500;
+  --ask-wash: #f6ecc9;
+  --over: var(--accent-text);
+  --over-wash: #ffe3da;
+
+  /* A failure, which is not a ruling: a write refused, a read that did not land. */
+  --danger: #b42318;
+  --danger-wash: #fde8e6;
+
+  --float: 0 2px 4px rgb(24 25 27 / 0.08), 0 16px 40px rgb(24 25 27 / 0.18);
+
+  /* Aliases: the names the components were first written against. */
+  --canvas: var(--frame);
+  --surface: var(--sheet);
+  --surface-sunken: var(--sheet-step);
+  --border: var(--edge);
+  --border-strong: var(--control-edge);
+  --ink-muted: var(--muted);
+  --ink-faint: var(--faint);
+  --accent-hover: var(--accent-strong);
+  --accent-wash: var(--over-wash);
+  --calm: var(--go);
+  --calm-wash: var(--go-wash);
+  --urgent: var(--ask);
+  --urgent-wash: var(--ask-wash);
 
   /*
-   * Ink, in three weights, and all three clear 4.5:1 on every ground below.
-   *
-   * `faint` began lighter, as furniture that was never meant to carry a
-   * sentence — and then it was carrying a chart's axis labels, the end of a
-   * list and the line under each card on the front page. Rather than police
-   * that at every call site, it was darkened until the quietest text in the
-   * application is still readable text. The step between the three is smaller
-   * than it was; being able to read all of them is worth more than the contrast
-   * between them.
+   * The day chart's four rates. Deflection — what nobody had to touch, the
+   * AI's share — takes the answered green; resolution is ink; the two missed
+   * targets take amber and grey. The orange stays on the hand-over.
    */
-  --ink: #131a26;
-  --ink-muted: #5a6675;
-  --ink-faint: #66707d;
+  --series-1: var(--go);
+  --series-2: var(--ink);
+  --series-3: var(--ask);
+  --series-4: var(--muted);
 
-  /* Identity and action. */
-  --accent: #1d63c4;
-  --accent-hover: #17509f;
-  --accent-ink: #ffffff;
-  --accent-wash: #eaf1fb;
+  --radius-control: 8px;
+  --radius-sheet: 16px;
+  --radius: 10px;
 
-  /* Elapsed time, and nothing else. */
-  --urgent: #b4501c;
-  --urgent-wash: #fdf0e8;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Refusal. Distinct from urgent: one is a clock, the other is a failure. */
-  --danger: #b3261e;
-  --danger-wash: #fdecea;
-
-  /* Settled. */
-  --calm: #10714f;
-  --calm-wash: #e6f4ee;
-
-  /*
-   * Internal, and not for the Contact's eyes.
-   *
-   * Its own hue rather than the urgent orange it used to borrow. A Note is an
-   * aside between colleagues — it is not late, and nothing has gone wrong — and
-   * dressing one as a warning taught readers to skim past the colour that is
-   * supposed to mean a ticket has gone unanswered.
-   */
-  --note: #5b4bb0;
-  --note-wash: #f1effa;
-
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  --series-3: #1baf7a;
-  --series-4: #eda100;
-
-  /* Depth. Two steps only — a raised card and a thing that floats over the
-     page. A third step invites every element to claim it is the important one. */
-  --lift: 0 1px 2px rgb(19 26 38 / 0.04), 0 1px 3px rgb(19 26 38 / 0.06);
-  --lift-high: 0 4px 12px rgb(19 26 38 / 0.08), 0 12px 32px rgb(19 26 38 / 0.1);
-
-  --radius: 0.625rem;
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2355585e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
-/*
- * The dark palette, named once.
- *
- * It is applied by two rules — the media query for a reader who has expressed
- * no preference, and the attribute for one who has picked from the control.
- * Only the *assignments* are written twice; the values live here alone, because
- * a second copy of a hex code is where two themes quietly stop matching.
- */
-:root {
-  --d-canvas: #0c1017;
-  --d-surface: #141a23;
-  --d-surface-sunken: #10151d;
-  --d-border: #232c39;
-  --d-border-strong: #35404f;
-
-  --d-ink: #e7ebf1;
-  --d-ink-muted: #9aa6b6;
-  --d-ink-faint: #6e7b8c;
-
-  /* Lifted, not inverted. The light-mode accent is legible on white and
-     muddy on near-black; these are the same hues re-chosen for this ground. */
-  --d-accent: #6ba3f0;
-  --d-accent-hover: #8bb8f5;
-  --d-accent-ink: #0c1017;
-  --d-accent-wash: #17263c;
-
-  --d-urgent: #f0915f;
-  --d-urgent-wash: #2e1d13;
-
-  --d-danger: #f08a82;
-  --d-danger-wash: #2e1614;
-
-  --d-calm: #5ec79c;
-  --d-calm-wash: #10291f;
-
-  --d-note: #a99af0;
-  --d-note-wash: #1d1a30;
-
-  --d-series-1: #3987e5;
-  --d-series-2: #d95926;
-  --d-series-3: #199e70;
-  --d-series-4: #c98500;
-
-  /* Shadow does almost nothing on a dark ground; the border carries the
-     separation instead, which is why it steps up rather than the shadow. */
-  --d-lift: 0 1px 2px rgb(0 0 0 / 0.35);
-  --d-lift-high: 0 8px 28px rgb(0 0 0 / 0.55);
-}
-
-/* No stated preference: follow the system, unless light was chosen explicitly. */
+/* Dark: graphite, not an inversion. Written twice: the system setting, and the stored choice. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-
-    --canvas: var(--d-canvas);
-    --surface: var(--d-surface);
-    --surface-sunken: var(--d-surface-sunken);
-    --border: var(--d-border);
-    --border-strong: var(--d-border-strong);
-
-    --ink: var(--d-ink);
-    --ink-muted: var(--d-ink-muted);
-    --ink-faint: var(--d-ink-faint);
-
-    --accent: var(--d-accent);
-    --accent-hover: var(--d-accent-hover);
-    --accent-ink: var(--d-accent-ink);
-    --accent-wash: var(--d-accent-wash);
-
-    --urgent: var(--d-urgent);
-    --urgent-wash: var(--d-urgent-wash);
-
-    --danger: var(--d-danger);
-    --danger-wash: var(--d-danger-wash);
-
-    --calm: var(--d-calm);
-    --calm-wash: var(--d-calm-wash);
-
-    --note: var(--d-note);
-    --note-wash: var(--d-note-wash);
-
-    --series-1: var(--d-series-1);
-    --series-2: var(--d-series-2);
-    --series-3: var(--d-series-3);
-    --series-4: var(--d-series-4);
-
-    --lift: var(--d-lift);
-    --lift-high: var(--d-lift-high);
+    --ground: #18191b;
+    --frame: #1c1d20;
+    --sheet: #222427;
+    --sheet-step: #2f3236;
+    --raised: #2d2f33;
+    --edge: #383b40;
+    --control-edge: #4f535a;
+    --ink: #eff0f1;
+    --muted: #a3a5aa;
+    --faint: #9a9ca2;
+    --accent-strong: #ff6a45;
+    --accent-text: #ff6a45;
+    --go: #4cc98a;
+    --go-wash: #173426;
+    --ask: #e6b84a;
+    --ask-wash: #3a3016;
+    --over-wash: #3d1d14;
+    --danger: #ff8a7a;
+    --danger-wash: #3a1a17;
+    --float: 0 2px 4px rgb(0 0 0 / 0.3), 0 16px 40px rgb(0 0 0 / 0.5);
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a5aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   }
 }
 
-/* Chosen from the control, and it wins in both directions. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-
-  --canvas: var(--d-canvas);
-  --surface: var(--d-surface);
-  --surface-sunken: var(--d-surface-sunken);
-  --border: var(--d-border);
-  --border-strong: var(--d-border-strong);
-
-  --ink: var(--d-ink);
-  --ink-muted: var(--d-ink-muted);
-  --ink-faint: var(--d-ink-faint);
-
-  --accent: var(--d-accent);
-  --accent-hover: var(--d-accent-hover);
-  --accent-ink: var(--d-accent-ink);
-  --accent-wash: var(--d-accent-wash);
-
-  --urgent: var(--d-urgent);
-  --urgent-wash: var(--d-urgent-wash);
-
-  --danger: var(--d-danger);
-  --danger-wash: var(--d-danger-wash);
-
-  --calm: var(--d-calm);
-  --calm-wash: var(--d-calm-wash);
-
-  --note: var(--d-note);
-  --note-wash: var(--d-note-wash);
-
-  --series-1: var(--d-series-1);
-  --series-2: var(--d-series-2);
-  --series-3: var(--d-series-3);
-  --series-4: var(--d-series-4);
-
-  --lift: var(--d-lift);
-  --lift-high: var(--d-lift-high);
+  --ground: #18191b;
+  --frame: #1c1d20;
+  --sheet: #222427;
+  --sheet-step: #2f3236;
+  --raised: #2d2f33;
+  --edge: #383b40;
+  --control-edge: #4f535a;
+  --ink: #eff0f1;
+  --muted: #a3a5aa;
+  --faint: #9a9ca2;
+  --accent-strong: #ff6a45;
+  --accent-text: #ff6a45;
+  --go: #4cc98a;
+  --go-wash: #173426;
+  --ask: #e6b84a;
+  --ask-wash: #3a3016;
+  --over-wash: #3d1d14;
+  --danger: #ff8a7a;
+  --danger-wash: #3a1a17;
+  --float: 0 2px 4px rgb(0 0 0 / 0.3), 0 16px 40px rgb(0 0 0 / 0.5);
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a5aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
 @theme inline {
   --color-canvas: var(--canvas);
+  --color-frame: var(--frame);
+  --color-ground: var(--ground);
   --color-surface: var(--surface);
+  --color-sheet: var(--sheet);
   --color-sunken: var(--surface-sunken);
+  --color-raised: var(--raised);
   --color-line: var(--border);
   --color-line-strong: var(--border-strong);
 
@@ -231,7 +158,15 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-ink: var(--accent-ink);
+  --color-accent-text: var(--accent-text);
   --color-accent-wash: var(--accent-wash);
+
+  --color-go: var(--go);
+  --color-go-wash: var(--go-wash);
+  --color-ask: var(--ask);
+  --color-ask-wash: var(--ask-wash);
+  --color-over: var(--over);
+  --color-over-wash: var(--over-wash);
 
   --color-urgent: var(--urgent);
   --color-urgent-wash: var(--urgent-wash);
@@ -239,41 +174,31 @@
   --color-danger-wash: var(--danger-wash);
   --color-calm: var(--calm);
   --color-calm-wash: var(--calm-wash);
-  --color-note: var(--note);
-  --color-note-wash: var(--note-wash);
 
-  --font-sans:
-    var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: var(--font-work), ui-sans-serif, system-ui, sans-serif;
+  /* Code and IDs only, inside <code>/<pre>. The system's own stack: nothing to load. */
+  --font-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, monospace;
 
-  --shadow-lift: var(--lift);
-  --shadow-lift-high: var(--lift-high);
+  --shadow-lift: none;
+  --shadow-lift-high: var(--float);
 
   --radius-card: var(--radius);
 }
 
 /*
- * The motion vocabulary, named once.
- *
- * Four movements and no more, because a desk is somewhere people work all day
- * and the fastest way to make software tiring is to animate everything a
- * little differently. Each one has a job:
- *
- * `rise`  — something arrived that the reader did not ask for, and it should
- *           announce itself by moving into place rather than blinking into it.
- * `pop`   — something the reader *did* ask for, opening from the control they
- *           pressed. Shorter, and slightly overshooting, so it feels attached
- *           to the press.
- * `chime` — the bell, and only the bell. A count that changes silently in the
- *           corner of a busy screen is a count nobody notices.
- * `sheen` — a skeleton, saying "still coming" without a spinner.
- *
- * Every one of them is switched off wholesale by the reduced-motion rule at the
- * foot of this file. That is the only reason it is safe to use them freely.
+ * One face at three weights. Work Sans is loaded at 300, 400 and 500 and no
+ * heavier, so the two heavier utilities resolve to the heaviest weight the
+ * system has rather than to a synthesised bold.
  */
 @theme {
-  --animate-rise: rise 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-pop: pop 160ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 500;
+  /* Nothing under 13px on these screens. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.125rem;
+
+  --animate-rise: rise 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop: pop 160ms cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-chime: chime 700ms ease-in-out;
   --animate-sheen: sheen 1.6s ease-in-out infinite;
 }
@@ -281,14 +206,14 @@
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
 }
 
 @keyframes pop {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(-4px);
+    transform: scale(0.97) translateY(-4px);
   }
 }
 
@@ -313,90 +238,110 @@
   }
 }
 
+@keyframes lit {
+  from {
+    opacity: 0.25;
+  }
+}
+
 @layer base {
+  html {
+    scrollbar-color: var(--raised) var(--frame);
+  }
+
   body {
-    background-color: var(--canvas);
+    background-color: var(--frame);
     color: var(--ink);
-    font-feature-settings:
-      "cv05" 1,
-      "ss03" 1;
+    font-size: 0.875rem;
+    line-height: 1.45;
   }
 
-  /*
-   * One focus ring for the whole application, stated once.
-   *
-   * `:focus-visible` rather than `:focus` so a mouse press does not leave a
-   * ring behind, and an offset outline rather than a box-shadow so it stays
-   * visible over any surface colour including the accent fill it may land on.
-   */
+  /* One focus ring, the system's: 3px of the accent's text tone, offset. */
   :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    /* Deliberately no border-radius here. An outline already follows the
-       element's own corners, and setting a radius on focus would square off
-       every rounded button in the application at the moment it is focused. */
+    outline: 3px solid var(--accent-text);
+    outline-offset: 3px;
   }
 
-  /*
-   * Tailwind v4's preflight stopped giving buttons a pointer cursor, on the
-   * reasoning that a native button does not have one. Most of the controls in
-   * this application are buttons that look like rows and cards — a queue entry,
-   * a Ticket in a list — and those read as unclickable without it.
-   */
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   summary {
     cursor: pointer;
   }
 
-  /* Numbers in a queue, a table, or a KPI belong in columns. Tabular figures
-     stop a count from reflowing sideways every time it ticks. */
   th,
   td,
   time,
-  output {
+  output,
+  .num {
     font-variant-numeric: tabular-nums;
   }
 
+  code,
+  pre {
+    font-family: var(--font-mono);
+  }
+
   ::selection {
-    background-color: var(--accent-wash);
-    color: var(--ink);
+    background-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 }
 
-/*
- * The controls that appear on every Surface, stated once.
- *
- * These are the shapes that were being retyped as utility strings in a dozen
- * files — a button, a box somebody types into, a card, a status chip. Written
- * as classes because the alternative is twelve slightly different paddings,
- * and because the one thing a portfolio reader notices first is whether two
- * buttons on different screens are the same button.
- *
- * They compose with utilities rather than replacing them: `class="btn
- * btn-primary w-full"` is the intended shape.
- */
 @layer components {
+  /*
+   * The frame and the sheet.
+   *
+   * The window's ground is the frame tint, which the top bar sits on with no
+   * rule under it; the work is a white sheet inset from the window's left,
+   * right and bottom edges. Depth is that one tone step, never a shadow. On a
+   * phone the frame goes and the sheet is the screen.
+   */
+  .sheet {
+    background-color: var(--sheet);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-sheet);
+    margin: 0 8px 8px;
+    min-height: calc(100dvh - 56px);
+  }
+
+  @media (max-width: 639px) {
+    .sheet {
+      margin: 0;
+      border-width: 1px 0 0;
+      border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    }
+  }
+
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    /* 44px on touch, which is the floor a thumb needs. */
-    min-height: 2.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
+    min-height: 2.25rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--radius-control);
     border: 1px solid transparent;
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.25rem;
     white-space: nowrap;
     cursor: pointer;
     transition:
-      background-color 180ms ease,
-      border-color 180ms ease,
-      color 180ms ease,
-      box-shadow 180ms ease;
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      opacity 160ms ease,
+      transform 120ms var(--ease-out);
   }
 
   @media (pointer: coarse) {
@@ -405,16 +350,8 @@
     }
   }
 
-  /*
-   * `aria-disabled` as well as `disabled`, because several controls here refuse
-   * without going disabled on purpose — a disabled button cannot hold focus,
-   * and dropping a reader to the top of the document at the moment they press
-   * something is worse than the press doing nothing.
-   */
   .btn:not(:disabled):not([aria-disabled="true"]):active {
-    /* Barely there — 1.5% — but it is the difference between a control that
-       responds and one that merely changes colour a moment later. */
-    transform: scale(0.985);
+    transform: scale(0.97);
   }
 
   .btn:disabled,
@@ -423,29 +360,50 @@
     cursor: not-allowed;
   }
 
+  /* The one primary on a screen: the accent fill, its own ink. Never white on orange. */
   .btn-primary {
     background-color: var(--accent);
     color: var(--accent-ink);
   }
 
   .btn-primary:not(:disabled):not([aria-disabled="true"]):hover {
-    background-color: var(--accent-hover);
+    background-color: var(--accent-strong);
+  }
+
+  /* Every other filled action: ink on the sheet. */
+  .btn-ink {
+    background-color: var(--ink);
+    color: var(--sheet);
+  }
+
+  .btn-ink:not(:disabled):not([aria-disabled="true"]):hover {
+    opacity: 0.88;
   }
 
   .btn-quiet {
-    background-color: var(--surface);
-    border-color: var(--border-strong);
+    background-color: var(--sheet);
+    border-color: var(--edge);
     color: var(--ink);
   }
 
   .btn-quiet:not(:disabled):not([aria-disabled="true"]):hover {
-    background-color: var(--surface-sunken);
-    border-color: var(--ink-faint);
+    background-color: var(--sheet-step);
+    border-color: var(--control-edge);
   }
 
-  /* For the one destructive act on a screen, and never for more than one. */
+  /* A control in the frame: no box until it is touched. */
+  .btn-frame {
+    background-color: transparent;
+    color: var(--muted);
+  }
+
+  .btn-frame:not(:disabled):not([aria-disabled="true"]):hover {
+    background-color: var(--sheet-step);
+    color: var(--ink);
+  }
+
   .btn-danger {
-    background-color: var(--surface);
+    background-color: var(--sheet);
     border-color: var(--danger);
     color: var(--danger);
   }
@@ -454,200 +412,306 @@
     background-color: var(--danger-wash);
   }
 
-  /*
-   * A link that reads as one.
-   *
-   * Underlined rather than coloured alone: colour is not available to every
-   * reader, and a blue word in a paragraph of blue-grey ink is not a signal.
-   * The underline is offset far enough to clear descenders.
-   */
+  /* A link reads as one: ink, underlined, the line strengthening on hover. */
   .link {
-    color: var(--accent);
+    color: inherit;
     font-weight: 500;
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
+    text-decoration-color: color-mix(in oklab, currentColor 45%, transparent);
     border-radius: 2px;
-    transition: color 180ms ease;
+    transition: text-decoration-color 160ms ease;
   }
 
   .link:hover {
-    color: var(--accent-hover);
-    text-decoration-thickness: 2px;
+    text-decoration-color: currentColor;
   }
 
   .input {
     display: block;
     width: 100%;
-    min-height: 2.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--border-strong);
-    background-color: var(--surface);
+    min-height: 2.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--control-edge);
+    background-color: var(--sheet);
     color: var(--ink);
     font: inherit;
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     line-height: 1.5;
-    transition:
-      border-color 180ms ease,
-      box-shadow 180ms ease;
+    transition: border-color 160ms ease;
+  }
+
+  @media (pointer: coarse) {
+    .input {
+      min-height: 2.75rem;
+      font-size: 1rem;
+    }
   }
 
   .input::placeholder {
-    color: var(--ink-faint);
+    color: var(--faint);
   }
 
   .input:hover:not(:disabled) {
-    border-color: var(--ink-faint);
+    border-color: var(--muted);
   }
 
   .input:focus-visible {
-    border-color: var(--accent);
-    /* Outline *and* border, so the field reads as focused at a glance and not
-       only to whoever is looking for a ring. */
+    border-color: var(--ink);
     outline-offset: 1px;
   }
 
   .input:disabled {
-    background-color: var(--surface-sunken);
-    color: var(--ink-muted);
+    background-color: var(--sheet-step);
+    color: var(--muted);
     cursor: not-allowed;
   }
 
-  /*
-   * A native select, still native.
-   *
-   * The arrow is drawn here rather than by a JavaScript listbox, because a
-   * native select on a phone opens the platform's own wheel — which is better
-   * than anything reimplemented, and is the control a reader already knows.
-   * All this does is stop it looking like 1998 beside the other fields.
-   */
   select.input {
     appearance: none;
     padding-right: 2.25rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a6675' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: var(--chevron);
     background-repeat: no-repeat;
     background-position: right 0.625rem center;
     background-size: 1.125rem;
   }
 
-  @media (prefers-color-scheme: dark) {
-    select.input {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa6b6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-    }
-  }
-
-  /*
-   * A filter, as something you can hit.
-   *
-   * The checkbox inside is a real, visible checkbox — not a hidden input with a
-   * styled box drawn next to it. That trick looks the same and costs the thing
-   * that matters: the native control is what a screen reader announces, what a
-   * keyboard toggles with space, and what a test can click. What changes here
-   * is the target around it, which grows from a line of text to a pill the
-   * whole of which is clickable.
-   *
-   * `:has(:checked)` lights the pill from the input's own state, so there is
-   * one source of truth for whether this filter is on and it is the checkbox.
-   */
+  /* A filter as something to hit: the native checkbox stays, the pill around it is the target. */
   .filter-pill {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.375rem 0.75rem;
+    min-height: 2rem;
+    padding: 0 0.75rem;
     border-radius: 9999px;
-    border: 1px solid var(--border-strong);
-    background-color: var(--surface);
+    background-color: var(--sheet-step);
+    color: var(--muted);
     font-size: 0.8125rem;
     font-weight: 500;
-    line-height: 1.25rem;
     cursor: pointer;
     user-select: none;
     transition:
-      background-color 150ms ease,
-      border-color 150ms ease,
-      color 150ms ease;
+      background-color 160ms ease,
+      color 160ms ease;
   }
 
   .filter-pill:hover {
-    border-color: var(--ink-faint);
-    background-color: var(--surface-sunken);
+    color: var(--ink);
   }
 
   .filter-pill:has(:checked) {
-    border-color: var(--accent);
-    background-color: var(--accent-wash);
-    color: var(--accent);
-    font-weight: 600;
+    background-color: var(--ink);
+    color: var(--sheet);
   }
 
-  /* The ring belongs on the pill, not on the 13px box inside it. */
   .filter-pill:has(:focus-visible) {
-    outline: 2px solid var(--accent);
+    outline: 3px solid var(--accent-text);
     outline-offset: 2px;
   }
 
   .filter-pill input {
-    accent-color: var(--accent);
+    accent-color: var(--ink);
     margin: 0;
     cursor: pointer;
   }
 
-  .card {
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background-color: var(--surface);
-    box-shadow: var(--lift);
+  .filter-pill:has(:checked) input {
+    accent-color: var(--sheet);
   }
 
-  /*
-   * A small piece of state next to the thing it describes.
-   *
-   * Never colour alone — every chip carries its word, so a reader who cannot
-   * separate the orange one from the green one still reads "Waiting" and
-   * "Resolved".
-   */
+  /* A panel inside the sheet: an edge, no shadow. */
+  .card {
+    border-radius: var(--radius);
+    border: 1px solid var(--edge);
+    background-color: var(--sheet);
+  }
+
+  /* Status beside the thing it describes: a wash and the ink of the same hue, and always its word. */
   .chip {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0.125rem 0.5rem;
+    min-height: 1.375rem;
+    padding: 0 0.5rem;
     border-radius: 9999px;
-    border: 1px solid transparent;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.8125rem;
+    font-weight: 500;
     line-height: 1.125rem;
     white-space: nowrap;
   }
 
   .chip-neutral {
-    background-color: var(--surface-sunken);
-    border-color: var(--border);
-    color: var(--ink-muted);
+    background-color: var(--sheet-step);
+    color: var(--muted);
   }
 
-  .chip-accent {
-    background-color: var(--accent-wash);
-    border-color: color-mix(in oklab, var(--accent) 25%, transparent);
-    color: var(--accent);
+  .chip-open {
+    background-color: var(--sheet-step);
+    color: var(--ink);
   }
 
-  .chip-urgent {
-    background-color: var(--urgent-wash);
-    border-color: color-mix(in oklab, var(--urgent) 25%, transparent);
-    color: var(--urgent);
+  .chip-accent,
+  .chip-over {
+    background-color: var(--over-wash);
+    color: var(--over);
   }
 
-  .chip-calm {
-    background-color: var(--calm-wash);
-    border-color: color-mix(in oklab, var(--calm) 25%, transparent);
-    color: var(--calm);
+  .chip-urgent,
+  .chip-ask {
+    background-color: var(--ask-wash);
+    color: var(--ask);
+  }
+
+  .chip-calm,
+  .chip-go {
+    background-color: var(--go-wash);
+    color: var(--go);
+  }
+
+  .chip-ink {
+    background-color: var(--ink);
+    color: var(--sheet);
   }
 
   .chip-danger {
     background-color: var(--danger-wash);
-    border-color: color-mix(in oklab, var(--danger) 25%, transparent);
     color: var(--danger);
+  }
+
+  /*
+   * The ruling: the signature element.
+   *
+   * Three outcomes in their fixed order, Answer, Ask, Hand over, exactly one
+   * lit. Always in that order, so the position alone says which one it was,
+   * and always with its word, so colour never has to.
+   */
+  .ruling {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    padding: 2px;
+    background: var(--sheet-step);
+    border-radius: var(--radius-control);
+  }
+
+  .ruling > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 6px;
+    border-radius: 6px;
+    color: var(--muted);
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .ruling [data-lit="answer"] {
+    background: var(--go);
+    color: var(--sheet);
+  }
+
+  .ruling [data-lit="clarify"] {
+    background: var(--ask);
+    color: var(--sheet);
+  }
+
+  .ruling [data-lit="escalate"] {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ruling [data-lit] {
+      animation: lit 420ms var(--ease-out) both;
+    }
+  }
+
+  /* The same strip at the size of a queue row: three segments, the lit one says it all. */
+  .mini-ruling {
+    display: inline-grid;
+    grid-template-columns: repeat(3, 14px);
+    gap: 2px;
+    padding: 2px;
+    border-radius: 5px;
+    background: var(--sheet-step);
+    flex: none;
+  }
+
+  .mini-ruling > i {
+    display: block;
+    height: 8px;
+    border-radius: 3px;
+    background: color-mix(in oklab, var(--muted) 28%, transparent);
+  }
+
+  .mini-ruling [data-lit="answer"] {
+    background: var(--go);
+  }
+
+  .mini-ruling [data-lit="clarify"] {
+    background: var(--ask);
+  }
+
+  .mini-ruling [data-lit="escalate"] {
+    background: var(--accent);
+  }
+
+  .mini-ruling[data-reading] > i {
+    animation: sheen 1.6s ease-in-out infinite;
+  }
+
+  /* A turn in the conversation: the customer's side in ink, ours on the step. */
+  .bubble {
+    padding: 10px 14px;
+    border-radius: 14px;
+    max-width: min(62ch, 100%);
+  }
+
+  .bubble-them {
+    background: var(--ink);
+    color: var(--sheet);
+    border-bottom-left-radius: 4px;
+  }
+
+  .bubble-us {
+    background: var(--sheet-step);
+    color: var(--ink);
+    border-bottom-right-radius: 4px;
+    margin-left: auto;
+  }
+
+  /*
+   * The stage: a field of the accent with the mark's speech-bubble tail cut
+   * into its top-left corner, pointing up at the words above it. The system
+   * allows it on one onboarding state in the app; this is the sign-in.
+   */
+  .stage {
+    --tail: clamp(56px, 6vw, 96px);
+    --tail-rise: calc(var(--tail) * 0.62);
+    background: var(--accent);
+    color: var(--accent-ink);
+    clip-path: polygon(0 0, var(--tail) var(--tail-rise), 100% var(--tail-rise), 100% 100%, 0 100%);
+    padding: calc(var(--tail-rise) + 24px) clamp(16px, 3vw, 40px) clamp(20px, 3vw, 40px);
+    border-radius: 0 0 var(--radius-sheet) var(--radius-sheet);
+  }
+
+  /* The note Automation hands a person: the step off the sheet; the orange stays on the strip. */
+  .handover-note {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--sheet-step);
+  }
+
+  /* A colleague's aside: the step off the sheet, dashed so it never reads as a reply. */
+  .staff-note {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--sheet-step);
+    outline: 1px dashed var(--control-edge);
+    outline-offset: -1px;
   }
 }
 

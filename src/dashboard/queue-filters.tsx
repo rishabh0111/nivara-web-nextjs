@@ -226,7 +226,7 @@ function ChoiceGroup<Value extends string>({
 
   return (
     <fieldset className="space-y-2">
-      <legend className="mb-2 text-xs font-semibold tracking-wide text-ink-muted uppercase">
+      <legend className="mb-2 text-[0.8125rem] font-medium text-ink">
         {legend}
       </legend>
       {/* Wrapped rather than stacked. Three columns of five stacked checkboxes
@@ -301,7 +301,7 @@ function AssigneeChoice({
   return (
     <div className="space-y-2">
       <fieldset className="space-y-2">
-        <legend className="mb-2 text-xs font-semibold tracking-wide text-ink-muted uppercase">
+        <legend className="mb-2 text-[0.8125rem] font-medium text-ink">
           Assignee
         </legend>
         <div className="flex flex-wrap gap-1.5">

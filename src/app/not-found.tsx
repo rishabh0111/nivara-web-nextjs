@@ -19,9 +19,9 @@ export default function NotFound() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md items-center justify-center px-6 py-12">
       <div className="w-full">
-        <p className="text-sm font-semibold tracking-wide text-accent uppercase">404</p>
+        <p className="text-sm text-ink-muted">Error 404</p>
 
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">Nothing lives at this address</h1>
+        <h1 className="mt-2 text-[1.75rem] leading-tight font-light tracking-[-0.02em]">Nothing lives at this address</h1>
 
         <p className="mt-3 text-sm leading-relaxed text-ink-muted">
           The Widget is the usual reason to end up here: it is not a page on this site. It renders
@@ -33,7 +33,7 @@ export default function NotFound() {
             <li key={entry.name}>
               <Link
                 href={entry.href}
-                className="group flex items-center gap-3 rounded-card border border-line bg-surface px-4 py-3 shadow-lift transition duration-200 hover:border-line-strong hover:shadow-lift-high"
+                className="group flex items-center gap-3 rounded-card border border-line bg-surface px-4 py-3 shadow-lift transition duration-200 hover:bg-sunken"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold tracking-tight">{entry.name}</span>
@@ -48,7 +48,7 @@ export default function NotFound() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="size-4 shrink-0 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent"
+                  className="size-4 shrink-0 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ink"
                 >
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>

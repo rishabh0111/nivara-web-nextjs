@@ -26,15 +26,14 @@ import { timeAgo } from "./time-ago";
 /**
  * What each state looks like, and why these and not others.
  *
- * Open is the accent because it is the work; resolved is the settled green
- * because it is finished. Pending wears the urgent colour on purpose — it is
- * the state that means somebody is waiting on us, which is the only state a
- * desk should feel bad about leaving alone. On hold and closed are deliberately
- * grey: neither is a call to action, and colouring them would spend attention
- * on rows nobody needs to look at.
+ * Open is ink on the step because it is the live work, and not the accent: the
+ * orange belongs to the hand-over alone. Resolved is the answered green
+ * because it is finished. Pending wears the amber of waiting. On hold and
+ * closed are deliberately grey: neither is a call to action, and colouring
+ * them would spend attention on rows nobody needs to look at.
  */
 export const TICKET_STATE_CHIP: Record<TicketState, string> = {
-  open: "chip-accent",
+  open: "chip-open",
   pending: "chip-urgent",
   on_hold: "chip-neutral",
   resolved: "chip-calm",
@@ -45,7 +44,7 @@ export const TICKET_STATE_CHIP: Record<TicketState, string> = {
 const PRIORITY_DOT: Record<TicketPriority, string> = {
   low: "bg-ink-faint",
   normal: "bg-ink-muted",
-  high: "bg-urgent",
+  high: "bg-ink",
   urgent: "bg-danger",
 };
 

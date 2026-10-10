@@ -39,7 +39,7 @@ export type ComposeClasses = {
 /** The Next application's, which is where three of the four callers render. */
 const DEFAULTS: ComposeClasses = {
   form: "space-y-2",
-  label: "block text-sm font-semibold tracking-tight text-ink",
+  label: "block text-sm font-medium text-ink",
   help: "text-sm leading-relaxed text-ink-muted",
   box: "input resize-y leading-relaxed",
   problem: "text-sm font-medium text-danger",

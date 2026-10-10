@@ -118,7 +118,7 @@ export function ThemeToggle() {
       onClick={() => choose(next)}
       aria-label={`Theme: ${LABELS[theme].toLowerCase()}. Switch to ${LABELS[next].toLowerCase()}.`}
       title={LABELS[theme]}
-      className="btn btn-quiet !min-h-0 px-2 py-1.5"
+      className="btn btn-frame !min-h-9 px-2"
     >
       <svg
         aria-hidden="true"

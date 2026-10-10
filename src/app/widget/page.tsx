@@ -45,7 +45,7 @@ export default function WidgetPage() {
       <header className="max-w-2xl">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-ink-muted transition-colors hover:text-accent"
+          className="inline-flex items-center gap-2 text-sm text-ink-muted transition-colors hover:text-ink"
         >
           <svg
             aria-hidden="true"
@@ -75,7 +75,7 @@ export default function WidgetPage() {
         this looking for a screenshot will not find one — there is no picture of
         the Widget here, only the Widget.
       */}
-      <section className="mt-12 rounded-card border border-accent/30 bg-accent-wash p-5">
+      <section className="mt-12 rounded-card bg-sunken p-5">
         <h2 className="text-base font-semibold tracking-tight">The launcher is on this page</h2>
         <p className="mt-3 text-sm leading-relaxed text-ink-muted">
           Bottom-right corner, reading <em>Chat with support</em>. It is the real build, running in
@@ -113,7 +113,7 @@ export default function WidgetPage() {
             >
               <span
                 aria-hidden="true"
-                className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-wash font-mono text-xs font-semibold text-accent"
+                className="flex size-7 shrink-0 items-center justify-center rounded-full bg-raised text-xs font-medium text-ink"
               >
                 {index + 1}
               </span>
@@ -151,7 +151,7 @@ export default function WidgetPage() {
           href="https://rishabh0111.github.io/nivara-web-nextjs/"
           target="_blank"
           rel="noopener"
-          className="mt-5 inline-flex items-center gap-2 rounded-card border border-line bg-surface px-4 py-2.5 text-sm font-medium shadow-lift transition duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-lift-high"
+          className="mt-5 inline-flex items-center gap-2 rounded-card border border-line bg-surface px-4 py-2.5 text-sm font-medium transition-colors duration-150 hover:bg-sunken"
         >
           Open the demo host
           <svg
