@@ -41,7 +41,7 @@ const ME = "usr_1";
 
 /** The words the header summarises the Ticket with — its state and priority. */
 function summary(): HTMLElement {
-  return screen.getByText(/priority · updated/i, { selector: "p" });
+  return screen.getByText(/priority · (via \w+ · )?updated/i, { selector: "p" });
 }
 
 /** What the state control currently offers, in the reader's words. */

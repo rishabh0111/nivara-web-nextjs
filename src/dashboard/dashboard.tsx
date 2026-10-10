@@ -8,6 +8,7 @@ import type { Ticket } from "@/tickets/ticket";
 
 import { useDashboardSession, useDashboardSignedIn } from "./dashboard-session-context";
 import { DashboardNav } from "./dashboard-nav";
+import { DemoOrientation } from "./demo-orientation";
 import { LiveNoticesProvider } from "./live-notices";
 import { Queue } from "./queue";
 import { SignInForm } from "./sign-in-form";
@@ -84,7 +85,7 @@ function SignedIn() {
     <>
       <DashboardNav current="queue" principal={principal} />
 
-      <main className="mx-auto w-full max-w-6xl space-y-6 px-4 pt-6 pb-24 sm:px-6 sm:pb-6">
+      <main className="mx-auto w-full max-w-6xl space-y-5 px-4 pt-6 pb-24 sm:px-6 sm:pb-6">
         <h1 className="text-2xl font-bold tracking-tight">Tickets</h1>
 
         {/* Above everything it is about. What has stopped is not the queue or the
@@ -92,6 +93,11 @@ function SignedIn() {
           a reader who has been told that should be told it before they read
           anything under it. */}
         <LiveSilence live={session.live} />
+
+        {/* For the visitor who pressed "live demo": who they are, what this
+            list is, and what to do first. On the queue only — inside a Ticket
+            they have already done the first thing it suggests. */}
+        {reading.view === "queue" ? <DemoOrientation principal={principal} /> : null}
 
         {/*
         The queue, immediately. There is no landing page to navigate away from —

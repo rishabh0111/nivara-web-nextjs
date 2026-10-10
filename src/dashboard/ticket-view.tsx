@@ -77,23 +77,34 @@ export function TicketView({ ticket, onBack }: { ticket: Ticket; onBack: () => v
         {/* The same one-line reading the queue shows, kept whole: it is what a
             reader who arrived from the list is already holding in their head. */}
         <p className="mt-1.5 text-sm text-ink-muted">
-          <TicketSummary ticket={current} />
+          <TicketSummary ticket={current} showSource />
         </p>
       </div>
 
-      <TicketActions ticket={current} />
+      {/* The conversation leads, because it is what a Ticket is: what the
+          customer asked and what has been said back, the AI's answer included.
+          On a wide screen the controls sit beside it rather than above it, so
+          neither pushes the other off the first screen; on a phone they follow
+          the thread. */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+        <div className="min-w-0 space-y-6">
+          <TicketConversation ticket={current} />
 
-      <TicketConversation ticket={current} />
+          {/* Both writes are against the Ticket the reader opened, never against an
+              earlier one in the chain. An earlier Ticket is finished work; a reply
+              addressed to one would be answered onto a record nobody is reading,
+              and the API would move it anyway. */}
+          <ReplyForm ticket={current} />
 
-      {/* Both writes are against the Ticket the reader opened, never against an
-          earlier one in the chain. An earlier Ticket is finished work; a reply
-          addressed to one would be answered onto a record nobody is reading,
-          and the API would move it anyway. */}
-      <ReplyForm ticket={current} />
+          <NoteForm ticketId={ticket.id} />
 
-      <NoteForm ticketId={ticket.id} />
+          <AuditTimeline ticketId={ticket.id} />
+        </div>
 
-      <AuditTimeline ticketId={ticket.id} />
+        <div className="min-w-0 lg:sticky lg:top-20">
+          <TicketActions ticket={current} />
+        </div>
+      </div>
     </section>
   );
 }
