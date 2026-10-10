@@ -13,11 +13,18 @@ import { ReadView } from "@/ui/read-view";
 
 import type { AnalyticsReport } from "./analytics-report";
 import type { AnalyticsCut } from "./analytics-window";
-import { describeCoveredWindow, EVER_SINCE, type AnalyticsWindow } from "./analytics-window";
+import {
+  coveredDays,
+  describeCoveredWindow,
+  EVER_SINCE,
+  type AnalyticsWindow,
+} from "./analytics-window";
 import { CutTable, describeEmptyCut } from "./cut-table";
 import { DayChart } from "./day-chart";
 import { HeadlineFigures } from "./headline-figures";
 import { useAnalyticsReport } from "./use-analytics-report";
+import { useWindowTickets } from "./use-window-tickets";
+import { RulingCells } from "@/dashboard/ruling-cells";
 import { ScreenSkeleton } from "@/ui/skeleton";
 import { ToastProvider } from "@/ui/toast";
 
@@ -58,18 +65,11 @@ function Permitted() {
     <>
       <DashboardNav current="analytics" principal={principal} />
 
-      <main className="mx-auto w-full max-w-6xl space-y-8 px-4 pt-6 pb-24 sm:px-6 sm:pb-6">
+      <main className="sheet">
+        <div className="mx-auto w-full max-w-[76rem] space-y-8 px-4 pt-5 pb-24 sm:px-6 sm:pt-6 sm:pb-8">
         {/* What the screen answers, before the figures do. "Deflection" is the
             trade's word, and a first-time reader should not have to know it. */}
-        <div className="space-y-1.5">
-          <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
-          <p className="max-w-[75ch] text-sm leading-relaxed text-ink-muted">
-            How the desk did on the tickets created in the window below: how many ended with no
-            agent touching them (deflection, which credits the AI and self-service), how many were
-            resolved, how often a response or resolution target was missed, and how long those
-            took.
-          </p>
-        </div>
+        <h1 className="text-[1.75rem] leading-tight font-light tracking-[-0.02em]">Analytics</h1>
 
         {isPending ? (
           <p role="status" className="text-sm text-ink-muted">
@@ -86,6 +86,7 @@ function Permitted() {
             Analytics is not available to your role. Everything else on the Dashboard is.
           </p>
         )}
+        </div>
       </main>
     </>
   );
@@ -109,7 +110,9 @@ function Report() {
       <WindowControls window={reading} onChange={setReading} covering={overall.value} />
 
       <ReadView read={overall} waiting="Reading the figures…">
-        {(report) => <HeadlineFigures metrics={report.overall} />}
+        {(report) => (
+          <HeadlineFigures metrics={report.overall} ruling={<WindowRuling covering={report} />} />
+        )}
       </ReadView>
 
       <Cut cut="priority" window={reading} />
@@ -139,9 +142,23 @@ function WindowControls({
   /** The window the figures on screen were computed over, once they are here. */
   covering: Pick<AnalyticsReport, "from" | "to"> | undefined;
 }) {
+  // The controls show the window the figures were computed over, read off the
+  // answer, until the reader picks their own: so the dates in the fields and
+  // the dates the caption prints are always the same two days.
+  const covered = covering ? coveredDays(covering.from, covering.to) : { from: "", to: "" };
+  // Once the reader has touched either field the window is theirs, and the
+  // fields show exactly what they chose (an emptied field stays empty). The
+  // first touch keeps the other field's shown day, so nothing moves under them.
+  const [touched, setTouched] = useState(false);
+  const shown = touched ? window : { from: window.from || covered.from, to: window.to || covered.to };
+  const choose = (next: Partial<AnalyticsWindow>) => {
+    onChange({ ...shown, ...next });
+    setTouched(true);
+  };
+
   return (
     <section aria-label="The window" className="card space-y-3 p-4">
-      <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-ink-muted uppercase">
+      <p className="flex items-center gap-2 text-sm font-medium text-ink">
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
@@ -158,7 +175,7 @@ function WindowControls({
         The window
       </p>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:max-w-md">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:max-w-md">
         <Field
           name="from"
           label="From"
@@ -166,17 +183,17 @@ function WindowControls({
           // The two ends bound each other in the control rather than being
           // caught after the API refuses them: a window that runs backwards is
           // a 400, and a reader should not have to read one to find out.
-          max={window.to || undefined}
-          value={window.from}
-          onChange={(event) => onChange({ ...window, from: event.target.value })}
+          max={shown.to || undefined}
+          value={shown.from}
+          onChange={(event) => choose({ from: event.target.value })}
         />
         <Field
           name="to"
           label="Until"
           type="date"
-          min={window.from || undefined}
-          value={window.to}
-          onChange={(event) => onChange({ ...window, to: event.target.value })}
+          min={shown.from || undefined}
+          value={shown.to}
+          onChange={(event) => choose({ to: event.target.value })}
         />
       </div>
 
@@ -221,7 +238,7 @@ function Days({ window }: { window: AnalyticsWindow }) {
 
   return (
     <section className="space-y-2">
-      <h2 className="text-base font-semibold tracking-tight text-ink">Day by day</h2>
+      <h2 className="text-[0.9375rem] font-medium text-ink">Day by day</h2>
 
       <ReadView read={read} waiting="Reading the days…">
         {(report) =>
@@ -252,5 +269,23 @@ function Nothing({ children }: { children: React.ReactNode }) {
     <p role="status" className="text-sm text-ink-muted">
       {children}
     </p>
+  );
+}
+
+/**
+ * What the AI did with the window's tickets, beside the deflection figure: one
+ * cell per ticket in its ruling's hue, and the three counts. Read from the
+ * tickets themselves; the report has no ruling to give.
+ */
+function WindowRuling({ covering }: { covering: Pick<AnalyticsReport, "from" | "to"> }) {
+  const listed = useWindowTickets(covering);
+  if (!listed || listed.tickets.length === 0) return null;
+
+  return (
+    <RulingCells
+      tickets={listed.tickets}
+      more={listed.more}
+      label="Tickets in the window, by what the AI did"
+    />
   );
 }

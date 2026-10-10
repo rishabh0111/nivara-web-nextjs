@@ -72,3 +72,18 @@ export function describeCoveredWindow(from: string, to: string): string {
 function asDay(at: Date): string {
   return at.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
+
+/**
+ * The two calendar days a report covers, as a date control holds them: the
+ * reader's day its start falls on, and the day of its last instant (the end
+ * is exclusive on the wire). What the window controls show until the reader
+ * picks their own.
+ */
+export function coveredDays(from: string, to: string): { from: string; to: string } {
+  return { from: asControlDay(new Date(from)), to: asControlDay(new Date(new Date(to).getTime() - 1)) };
+}
+
+function asControlDay(at: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`;
+}

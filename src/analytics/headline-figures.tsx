@@ -9,38 +9,65 @@ import {
 import { NoAnswer } from "./no-answer";
 
 /**
- * The six figures over the whole cohort, as tiles.
+ * The figures over the whole cohort: deflection as the headline, set as type
+ * beside the ruling (`ruling`, drawn by the caller), and the rest as one plain
+ * row of label and value.
  *
- * A tile rather than a chart because each one is a single number with nothing to
- * compare it against — a bar of length one is a number drawn badly.
+ * Deflection leads because it is the AI's figure — the share nobody touched —
+ * and it carries the answered green, the same outcome each queue row marks.
  *
  * Every rate carries the count it rests on, always and not on request. 26% of
  * four Tickets and 26% of four thousand are the same percentage and not the same
  * claim, and a reader shown only the percentage cannot tell which they have.
  *
- * A description list rather than a grid of divs: the pairing of a name to a
- * figure is what a definition list is, and it is what makes each tile read as
- * one thing rather than as two loose pieces of text.
+ * Description lists: the pairing of a name to a figure is what a definition
+ * list is, and it is what makes each read as one thing.
  */
-export function HeadlineFigures({ metrics }: { metrics: Metrics }) {
+export function HeadlineFigures({
+  metrics,
+  ruling,
+}: {
+  metrics: Metrics;
+  /** What the AI did with the window's tickets, beside the headline. */
+  ruling?: React.ReactNode;
+}) {
+  const [deflection, ...rates] = RATE_FIGURES;
+
   return (
-    <section aria-label="Headline figures" className="space-y-3">
-      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {RATE_FIGURES.map((figure) => (
-          <Tile key={figure.key} name={figure.name}>
-            {/* The explanation is underneath either way. Where there is an
-                answer it is the count the rate rests on; where there is none it
-                is why — and both are the same sentence about the same cohort. */}
+    <section aria-label="Headline figures" className="space-y-8">
+      <div className="grid gap-6 md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)] md:items-end md:gap-10">
+        {deflection ? (
+          <dl>
+            <div>
+              <dt className="text-sm text-ink-muted">{deflection.name}</dt>
+              <dd className="mt-1 space-y-1">
+                <p className="text-[2.75rem] leading-none font-light tracking-[-0.03em] text-go tabular-nums">
+                  {formatRate(metrics[deflection.key]) ?? <NoAnswer />}
+                </p>
+                <p className="text-sm text-ink-muted">
+                  {formatCohort(metrics[deflection.key], metrics.cohortSize)}
+                </p>
+              </dd>
+            </div>
+          </dl>
+        ) : null}
+
+        {ruling}
+      </div>
+
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-5 sm:grid-cols-3 lg:grid-cols-5">
+        {rates.map((figure) => (
+          <Figure key={figure.key} name={figure.name}>
             <Value>{formatRate(metrics[figure.key]) ?? <NoAnswer />}</Value>
             <Beneath>{formatCohort(metrics[figure.key], metrics.cohortSize)}</Beneath>
-          </Tile>
+          </Figure>
         ))}
 
         {DURATION_FIGURES.map((figure) => {
           const duration = metrics[figure.key];
 
           return (
-            <Tile key={figure.key} name={figure.name}>
+            <Figure key={figure.key} name={figure.name}>
               {duration === null ? (
                 <>
                   <Value>
@@ -50,9 +77,7 @@ export function HeadlineFigures({ metrics }: { metrics: Metrics }) {
                 </>
               ) : (
                 <>
-                  {/* Both percentiles, because the typical case and the bad case
-                      are the two things anyone is asking about — a median alone
-                      hides the tail it was computed to summarise. */}
+                  {/* Both percentiles: the typical case and the bad case. */}
                   <Value>
                     <span>{formatDuration(duration.p50)}</span> <Unit>median</Unit>
                   </Value>
@@ -61,7 +86,7 @@ export function HeadlineFigures({ metrics }: { metrics: Metrics }) {
                   </Beneath>
                 </>
               )}
-            </Tile>
+            </Figure>
           );
         })}
       </dl>
@@ -69,27 +94,23 @@ export function HeadlineFigures({ metrics }: { metrics: Metrics }) {
   );
 }
 
-function Tile({ name, children }: { name: string; children: React.ReactNode }) {
+function Figure({ name, children }: { name: string; children: React.ReactNode }) {
   return (
-    <div className="card p-4 transition-shadow duration-200 hover:shadow-lift-high">
-      <dt className="text-xs font-semibold tracking-wide text-ink-muted uppercase">{name}</dt>
-      <dd className="mt-2 space-y-1">{children}</dd>
+    <div className="min-w-0">
+      <dt className="text-[0.8125rem] text-ink-muted">{name}</dt>
+      <dd className="mt-1 space-y-0.5">{children}</dd>
     </div>
   );
 }
 
 function Value({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-3xl leading-none font-bold tracking-tight text-ink tabular-nums">
-      {children}
-    </p>
-  );
+  return <p className="text-xl leading-tight font-normal text-ink tabular-nums">{children}</p>;
 }
 
 function Unit({ children }: { children: React.ReactNode }) {
-  return <span className="text-sm font-normal text-ink-muted">{children}</span>;
+  return <span className="text-[0.8125rem] font-normal text-ink-muted">{children}</span>;
 }
 
 function Beneath({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm text-ink-muted">{children}</p>;
+  return <p className="text-[0.8125rem] text-ink-muted">{children}</p>;
 }

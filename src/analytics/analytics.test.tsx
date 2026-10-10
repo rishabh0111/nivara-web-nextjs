@@ -184,11 +184,18 @@ describe("choosing the window", () => {
     const asked: URLSearchParams[] = [];
     const user = await openAnalytics(asked);
 
+    // The fields show the window the figures cover until one is chosen, so a
+    // reader choosing their own replaces what is there.
+    await user.clear(screen.getByLabelText(/^from$/i));
     await user.type(screen.getByLabelText(/^from$/i), "2026-07-01");
+    await user.clear(screen.getByLabelText(/^until$/i));
     await user.type(screen.getByLabelText(/^until$/i), "2026-07-31");
 
     await waitFor(() => {
-      const windowed = asked.filter((query) => query.get("to") !== null);
+      // Both ends chosen: clearing a prefilled field asks once with one end.
+      const windowed = asked.filter(
+        (query) => query.get("from") !== null && query.get("to") !== null,
+      );
       // Every cut and the report over everything: five questions, one window.
       expect(new Set(windowed.map((query) => query.get("groupBy"))).size).toBe(5);
 
@@ -387,6 +394,7 @@ describe("reading it without a pointer or a screen", () => {
   it("names the window controls, and reaches them by keyboard", async () => {
     const user = await openAnalytics([]);
 
+    await user.clear(screen.getByLabelText(/^from$/i));
     screen.getByLabelText(/^from$/i).focus();
     await user.keyboard("2026-07-01");
     await user.tab();

@@ -48,7 +48,7 @@ export function CutTable({
     >
       <table className="w-full min-w-[48rem] border-collapse text-left text-sm">
         <caption className="pb-3 text-left text-sm text-ink-muted">
-          <span className="text-base font-semibold tracking-tight text-ink">{heading.name}</span>
+          <span className="text-[0.9375rem] font-medium text-ink">{heading.name}</span>
           {heading.excludes ? `: ${heading.excludes}` : null}
         </caption>
 
@@ -71,7 +71,7 @@ export function CutTable({
               key={group.key}
               className="border-b border-line transition-colors duration-150 last:border-0 hover:bg-sunken"
             >
-              <th scope="row" className="py-2.5 pr-3 font-semibold whitespace-nowrap">
+              <th scope="row" className="py-2.5 pr-3 font-medium whitespace-nowrap">
                 {nameGroup(cut, group.key)}
               </th>
               <td className="py-2.5 pr-3 tabular-nums">
@@ -126,7 +126,7 @@ function Header({ children }: { children: React.ReactNode }) {
   return (
     <th
       scope="col"
-      className="py-2 pr-3 text-xs font-semibold tracking-wide whitespace-nowrap text-ink-muted uppercase"
+      className="py-2 pr-3 text-xs font-normal whitespace-nowrap text-ink-muted"
     >
       {children}
     </th>
