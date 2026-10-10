@@ -143,71 +143,29 @@ export function QueueFreshness({
   const [asked, setAsked] = useState(false);
 
   return (
-    <div className="ml-auto flex min-h-13 flex-wrap items-center justify-end gap-3 text-sm">
+    <div className="flex items-center justify-end text-sm">
       {/*
+        What is said, said once, to assistive technology: the button below
+        carries the same state visually (filled with a dot when there is new
+        activity, a tick once a refresh came back clean), so a separate pill
+        beside it would be the same fact twice.
+
         "Up to date" is said only once a read has come back, and come back
         without being refused — which is what makes it a claim about the
-        server's answer rather than about the click. Said at all because the
-        answer to a refresh is very often a list that looks identical, and a
-        reader who cannot see the list would otherwise have pressed a button and
-        been told nothing.
+        server's answer rather than about the click.
       */}
-      <p
-        role="status"
-        aria-label="Whether this list is current"
-        // The chip only appears once there is something to say. Accent when
-        // the list has been overtaken: it is news with an action beside it,
-        // not a fault, and orange is kept for time running out. Calm when it
-        // is current — the two readings are never the same colour by accident.
-        className={
-          overtaken
-            ? "chip chip-accent"
-            : asked && !rereading && !failed
-              ? "chip chip-calm"
-              : "text-ink-muted"
-        }
-      >
-        {overtaken ? (
-          <>
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-3.5"
-            >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            New activity since this list loaded.
-          </>
-        ) : asked && !rereading && !failed ? (
-          <>
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-3.5"
-            >
-              <path d="m20 6-11 11-5-5" />
-            </svg>
-            The queue is up to date.
-          </>
-        ) : null}
+      <p role="status" aria-label="Whether this list is current" className="sr-only">
+        {overtaken
+          ? "New activity since this list loaded."
+          : asked && !rereading && !failed
+            ? "The queue is up to date."
+            : null}
       </p>
 
       {/*
         Always here, never only while there is something to catch up on. A
         control that vanished under the reader at the moment they used it would
-        drop a keyboard to the top of the document, which is the mistake the end
-        of the list is careful not to make — and a reader who simply wants to
-        know should not have to be told first before they can ask.
+        drop a keyboard to the top of the document.
       */}
       <button
         type="button"
@@ -215,7 +173,14 @@ export function QueueFreshness({
           setAsked(true);
           refresh();
         }}
-        className="btn btn-quiet !min-h-0 px-3 py-1.5 text-sm"
+        title={
+          overtaken
+            ? "New activity since this list loaded"
+            : asked && !rereading && !failed
+              ? "The queue is up to date"
+              : undefined
+        }
+        className={`btn !min-h-10 px-3 ${overtaken ? "btn-ink" : "btn-quiet"}`}
       >
         <svg
           aria-hidden="true"
@@ -227,9 +192,15 @@ export function QueueFreshness({
           strokeLinejoin="round"
           className="size-4"
         >
-          <path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6" />
+          {asked && !rereading && !failed && !overtaken ? (
+            <path d="m20 6-11 11-5-5" />
+          ) : (
+            <path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6" />
+          )}
         </svg>
-        Refresh the queue
+        <span className="sr-only sm:not-sr-only">
+          {overtaken ? "New activity · Refresh the queue" : "Refresh the queue"}
+        </span>
       </button>
     </div>
   );

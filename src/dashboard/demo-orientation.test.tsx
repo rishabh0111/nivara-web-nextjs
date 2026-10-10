@@ -23,13 +23,12 @@ const demoAdmin: StaffPrincipal = {
 afterEach(() => window.localStorage.clear());
 
 describe("the demo orientation", () => {
-  it("says who the visitor is, what the list is, and what to try first", () => {
+  it("says who the visitor is and what to try that is not on this screen", () => {
     render(<DemoOrientation principal={demoAdmin} />);
 
     expect(
       screen.getByRole("heading", { name: /you are ada okonjo, admin at meridian/i }),
     ).toBeVisible();
-    expect(screen.getByText(/portal, the website widget and slack/i)).toBeVisible();
     expect(screen.getByRole("link", { name: /ask the widget a question/i })).toHaveAttribute(
       "href",
       "/widget",
@@ -38,7 +37,6 @@ describe("the demo orientation", () => {
       "href",
       "/portal?demo",
     );
-    expect(screen.getByRole("link", { name: /read the analytics/i })).toBeVisible();
   });
 
   it("is not shown to anyone signed in with their own account", () => {
@@ -47,12 +45,6 @@ describe("the demo orientation", () => {
     );
 
     expect(container).toBeEmptyDOMElement();
-  });
-
-  it("offers analytics only to a role that can read it", () => {
-    render(<DemoOrientation principal={{ ...demoAdmin, role: "agent" }} />);
-
-    expect(screen.queryByRole("link", { name: /read the analytics/i })).not.toBeInTheDocument();
   });
 
   it("stays dismissed in this browser once put down", async () => {

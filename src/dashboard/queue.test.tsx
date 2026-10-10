@@ -363,6 +363,11 @@ describe("working the queue by keyboard", () => {
     await user.tab();
     expect(screen.getByRole("button", { name: /^theme:/i })).toHaveFocus();
 
+    // Then the one action the finding offers: the printer is open and nobody
+    // has claimed it, so showing only what needs a person is a press away.
+    await user.tab();
+    expect(screen.getByRole("button", { name: /show only these/i })).toHaveFocus();
+
     // Then the filters, which sit above the list because they describe it.
     // Folded, they are one stop rather than twenty; unfolded, the first
     // control is next — and past them, the end of the list.

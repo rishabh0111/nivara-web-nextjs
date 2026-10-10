@@ -62,11 +62,27 @@ export const noRefreshCookie = http.post(`${baseUrl}/auth/refresh`, () =>
   ),
 );
 
+/**
+ * What a queue row reads to show the AI's ruling, when a test has not said.
+ *
+ * A widget ticket's row reads its thread and notes for the ruling, and the
+ * analytics screen lists its window's tickets for theirs. A test about
+ * something else has no reason to answer those, so they answer empty — after
+ * every handler the test passed, so a test that does answer them is the one
+ * that is heard.
+ */
+const quietThreads = [
+  http.get(`${baseUrl}/tickets`, () => HttpResponse.json({ data: [], nextCursor: null })),
+  http.get(`${baseUrl}/tickets/:id/messages`, () => HttpResponse.json({ data: [], nextCursor: null })),
+  http.get(`${baseUrl}/tickets/:id/notes`, () => HttpResponse.json({ data: [], nextCursor: null })),
+];
+
 export function dashboardApi(...standing: RequestHandler[]): SetupServer {
   return setupServer(
     http.all(`${NOWHERE}/*`, () => passthrough()),
     noRefreshCookie,
     ...standing,
+    ...quietThreads,
   );
 }
 
